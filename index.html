@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>C 통합 마음 가이드 & 기록장 (with ACIM)</title>
+    <title>통합 마음 가이드 & 기록장 (with ACIM)</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         :root {
-            /* 감정,욕구 카드의 카테고리 색상 */
+            /* 감정,욕구 카드를 위한 카테고리 색상 */
             --meaning-core: #ffcc80; --connection-core: #f48fb1; --autonomy-core: #90cead;
             --wellbeing-core: #81d4fa; --peace-core: #b39ddb;
             --joy-core: #fff176; --love-core: #f06292; --sadness-core: #64b5f6;
@@ -270,11 +270,13 @@
         }
         .acim-container h1 { font-size: 1.4rem; font-weight: 800; text-align: center; margin: 5px 0; color: var(--primary-blue); }
         .acim-container label { display: block; font-weight: 700; font-size: 15px; margin-bottom: 4px; color: var(--primary-blue); }
+        
+        /* 기본 최소 높이를 85px로 정밀 세팅 */
         .acim-container textarea {
             width: 100%; padding: 14px; border: none; border-radius: 8px;
             background-color: var(--light-blue); font-family: inherit; font-size: 14px;
             line-height: 1.6; box-sizing: border-box; resize: none; margin-bottom: 0;
-            height: auto; min-height: 130px; overflow-y: hidden; color: #2c3e50;
+            height: auto; min-height: 85px; overflow-y: hidden; color: #2c3e50;
         }
         .acim-container textarea::placeholder { color: #9bbad3; font-size: 13px; }
         
@@ -444,7 +446,7 @@
     <div class="acim-container" id="acim-main-container">
         <audio id="step-audio" preload="auto"></audio>
 
-        <!-- 타이틀 및 설명 문구를 제거하고 가이드 재생 버튼만 깔끔하게 구성 -->
+        <!-- 재생 제어 카드 부문 -->
         <div class="acim-card" style="border-top: 5px solid var(--primary-blue); text-align: center;">
             <button id="audio-toggle-sq" class="acim-audio-btn-sq" onclick="toggleAudio()">
                 <span id="audio-icon">▶ 가이드 음성 재생</span>
@@ -477,7 +479,7 @@
             <div class="acim-card" style="border-top: 5px solid var(--success-color);">
                 <label id="acim-insight-label">통찰 기록</label>
                 <div class="acim-card-desc">안내를 음미하며 마음 깊은 곳에서 새롭게 채워지는 통찰이나 평온의 감각을 자유롭게 남깁니다.</div>
-                <textarea id="acim-insight" style="min-height: 140px;" placeholder="지금 이 순간 느껴지는 내면의 고요한 목소리를 받아 적어보세요..." oninput="saveCurrentInsight()"></textarea>
+                <textarea id="acim-insight" style="min-height: 90px;" placeholder="지금 이 순간 느껴지는 내면의 고요한 목소리를 받아 적어보세요..." oninput="saveCurrentInsight()"></textarea>
             </div>
             
             <div class="acim-button-group" id="acim-nav-group">
@@ -635,7 +637,7 @@ const emotionsData = [
     { name: "답답하다", cat: "cat-ang", desc: "소통과 자유가 해소되지 못하고 갇힌 기분", sit: "말이 통하지 않거나 정체되어 있을 때", body: "가슴 한복판이 꽉 막힌 느낌과 목이 조이는 듯함", aff: "답답함은 변화를 원한다는 신호입니다." },
     { name: "억울하다", cat: "cat-ang", desc: "공정함이 훼손되었다고 느껴지는 분노", sit: "오해받거나 기여가 무시당했을 때", body: "눈시울이 뜨거워지고 이가 갈리며 주먹에 힘이 들어감", aff: "진실은 나를 지켜줄 것입니다." },
     { name: "짜증나다", cat: "cat-ang", desc: "불만족이 반복되어 날카로운 상태", sit: "피로가 쌓인 상태에서 소음을 겪을 때", body: "얼굴 근육이 팽팽해지고 목소리가 날카워지며 미간을 찌푸림", aff: "나는 감정의 주인이며 평온을 선택합니다." },
-    { name: "불쾌하다", cat: "cat-joy", desc: "어떤 사물이나 상황이 마음에 들지 않아 기분이 좋지 않고 꺼림칙한 상태", sit: "무례한 행동을 목격하거나, 위생적이지 못한 환경에 처했을 때", body: "미간이 찌푸려지고 몸이 움츠러들며, 기운이 소모되는 느낌이 듦", aff: "불편한 원인을 살피고, 나를 보호하기 위해 적절한 거리를 둡니다." },
+    { name: "불쾌하다", cat: "cat-ang", desc: "어떤 사물이나 상황이 마음에 들지 않아 기분이 좋지 않고 꺼림칙한 상태", sit: "무례한 행동을 목격하거나, 위생적이지 못한 환경에 처했을 때", body: "미간이 찌푸려지고 몸이 움츠러들며, 기운이 소모되는 느낌이 듦", aff: "불편한 원인을 살피고, 나를 보호하기 위해 적절한 거리를 둡니다." },
     { name: "분하다", cat: "cat-ang", desc: "부당한 일로 울분이 가득 찬 상태", sit: "노력을 가로채이거나 상처 입었을 때", body: "얼굴이 붉어지고 몸에 열이 오르며 거친 숨을 내쉼", aff: "지혜로운 대처를 통해 나를 지겠습니다." },
     { name: "밉다", cat: "cat-ang", desc: "원망스러워 거리감을 두고 싶은 감정", sit: "진심을 무시한 상대가 떠오를 때", body: "입술을 굳게 다물게 되고 상대 쪽으로 고개를 돌리기 싫어짐", aff: "미움 대신 나를 아끼는 마음을 채웁니다." },
     { name: "원망스럽다", cat: "cat-ang", desc: "고통의 책임을 상대에게 돌리는 아픈 마음", sit: "결정적 순간에 곁에 없었던 이에 대한 서운함", body: "가슴 깊은 곳이 쓰리고 명치 부근이 딱딱해짐", aff: "기대를 내려놓고 스스로를 돕습니다." },
@@ -662,7 +664,7 @@ const emotionsData = [
     { name: "괴롭다", cat: "cat-sad", desc: "고통이 극심하여 벗어나고 싶은 간절함", sit: "상처가 떠오르거나 현실이 힘들 때", body: "온몸의 근육이 뒤틀리는 듯하고 가슴이 찢어지는 통증", aff: "고통을 따뜻하게 안아주며 치유합니다." },
     { name: "그리워하다", cat: "cat-sad", desc: "부재하는 대상과 연결되고 싶은 상태", sit: "이별한 이의 유품이나 흔적을 볼 때", body: "가슴 부근이 아련하게 저리고 목소리가 떨림", aff: "그리움은 내가 사랑했다는 증거입니다." },
     { name: "실망하다", cat: "cat-sad", desc: "기대가 무너져 허탈하고 신뢰가 흔들림", sit: "믿었던 이의 무심한 모습을 보았을 때", body: "몸에서 기운이 빠져나가며 입안이 마르는 느낌", aff: "실망은 환상이 걷힌 자리에 진실을 세우는 일입니다." },
-    { name: "서럽다", cat: "cat-sad", desc: "억울함과 슬픔이 북받쳐 오르는 아픈 마음", sit: "혼자 아프거나 오해받을 때", body: "어깨를 떨며 흐느끼게 되고 가슴이 요동침", aff: "내 마음의 울음을 충분히 들어주겠습니다." },
+    { name: "서럽다", cat: "cat-sad", desc: "억울함และ 슬픔이 북받쳐 오르는 아픈 마음", sit: "혼자 아프거나 오해받을 때", body: "어깨를 떨며 흐느끼게 되고 가슴이 요동침", aff: "내 마음의 울음을 충분히 들어주겠습니다." },
     { name: "안타깝다", cat: "cat-sad", desc: "상황을 개선해주고 싶으나 뜻대로 안 됨", sit: "도움을 주고 싶지만 지켜만 봐야 할 때", body: "손바닥을 비비거나 발을 동동 구르며 가슴이 타는 듯함", aff: "나의 기도가 작은 위로가 되길 바랍니다." },
     { name: "아쉽다", cat: "cat-sad", desc: "바라던 바가 채워지지 않아 미련이 남음", sit: "조금만 더 노력했거나 기회가 있었다면 결과가 달랐을 때", body: "입술을 깨물거나 한숨을 깊게 쉬며 가슴 한구석이 허전함", aff: "다음에는 당신이 원하는 결과를 꼭 얻기를 응원합니다." },
     { name: "허탈하다", cat: "cat-sad", desc: "결과가 무너져 에너지가 빠져나간 허전함", sit: "노력이 수포로 돌아갔을 때", body: "팔다리에 힘이 하나도 없고 가슴 속이 텅 빈 구멍 같음", aff: "비워진 마음을 인정하며 새로운 에너지를 기다립니다." }
@@ -940,7 +942,7 @@ function syncTitleAndLoad() {
         else el.innerText = val;
     }
     
-    // ACIM 탭 데이터 강제 미러링 연결 (1번 사건, 3번 생각)
+    // ACIM 탭 데이터 강제 미러링 연결
     const evVal = document.getElementById('step1').value;
     const jdVal = document.getElementById('step3').innerText;
     const acimEv = document.getElementById('acim-event');
@@ -952,9 +954,9 @@ function syncTitleAndLoad() {
         autoResizeTextarea(acimJd);
     }
     
-    // 명상 통찰 기록 보관 패키지 역로드
+    // [중요] 명상 통찰 보관 패키지 역로드 범위를 5번까지 확장 (4단계 통찰 분리 지원)
     stepInsights = {};
-    for(let i=1; i<=4; i++) {
+    for(let i=1; i<=5; i++) {
         stepInsights[i] = localStorage.getItem(key + "_acim_insight_" + i) || "";
     }
     
@@ -997,8 +999,8 @@ function saveAllToLocal() {
         localStorage.setItem(key + "_step" + i, val);
     }
     
-    // 명상 통찰 기록(4단계 패키지)을 브라우저 스토리지 공통 저장소 영역에 유실 없이 보관
-    for(let i=1; i<=4; i++) {
+    // [중요] 4단계 독립 통찰 저장을 위해 반복 한도를 i<=5로 안전하게 확장 
+    for(let i=1; i<=5; i++) {
         localStorage.setItem(key + "_acim_insight_" + i, stepInsights[i] || "");
     }
 }
@@ -1102,12 +1104,15 @@ function copyQ2() {
    ========================================================================== */
 let currentStepIndex = -1; 
 let stepInsights = {};
+
+// [업데이트] 4단계 스크립트를 공식 추가 탑재했습니다.
 const scripts = [
     { title: "안내: 정화 준비", text: "정화하고 싶은 사건과 판단을 적어주세요.", audio: "audio/step0.mp3" },
     { title: "준비: 마음 가다듬기", text: "잠시 눈을 감고 깊게 숨을 들이마시고 내뱉습니다.\n이제 성령께 이 기억을 맡길 준비를 합니다.", audio: "audio/step1.mp3" },
     { title: "1단계: 성령께 맡기기", text: `"나는 이 사건을 내가 생각하는 의미로 이해하지 않겠습니다." \n\n"나는 이 상황을 다른 관점에서 보겠습니다."`, audio: "audio/step2.mp3" },
     { title: "2단계: 기억의 정화", text: `"내가 이 기억에 대해 느끼는 분노는 내가 보고 있는 과거에 근거한 것이며, 지금 여기에는 존재하지 않습니다."`, audio: "audio/step3.mp3" },
-    { title: "3단계: 용서와 취소", text: `"성령님, 제가 이 기억을 당신의 시각으로 보게 도와주십시오."\n\n과거의 무거운 짐을 내려놓습니다.`, audio: "audio/step4.mp3" }
+    { title: "3단계: 용서와 취소", text: `"성령님, 제가 이 기억을 당신의 시각으로 보게 도와주십시오."\n\n과거의 무거운 짐을 내려놓습니다.`, audio: "audio/step4.mp3" },
+    { title: "4단계: 평온과 기적", text: `"내면에 있는 본래의 평온과 하나가 됩니다.\n갈등이 완전히 사라진 자리에 기적과 사랑을 흔쾌히 수용합니다."`, audio: "audio/step5.mp3" }
 ];
 
 let audioPlayer;
@@ -1132,7 +1137,8 @@ function toggleAudio() {
 }
 
 function saveCurrentInsight() { 
-    if(currentStepIndex >= 1 && currentStepIndex <= 4) {
+    // 저장 범위 상한선을 5까지 늘려 4단계 내용이 스토리지 유실 없이 기록되도록 수정
+    if(currentStepIndex >= 1 && currentStepIndex <= 5) {
         stepInsights[currentStepIndex] = document.getElementById('acim-insight').value; 
         saveAllToLocal(); 
     }
@@ -1163,6 +1169,7 @@ function updateAcimUI() {
     document.getElementById('acim-meditation-content').innerText = currentContent.text;
     document.getElementById('acim-insight-label').innerText = `${currentContent.title.split(':')[0]} 통찰 기록`;
     
+    // 분리 매칭 기법을 적용하여 4단계 배열 고유 슬롯 데이터를 렌더링
     document.getElementById('acim-insight').value = stepInsights[currentStepIndex] || "";
     
     document.getElementById('acim-prev-btn').disabled = (currentStepIndex === 1);
@@ -1211,7 +1218,7 @@ function resetAcimMeditation() {
 
 /* ==========================================================================
    라이프사이클 및 이벤트 초기화 영역
-   ========================================================================== */
+   ========================================================================= */
 window.onload = function() {
     renderUserList();
     const lastUser = localStorage.getItem("lastSelectedUser");
