@@ -2,10 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>C 통합 마음 가이드 & 기록장</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>통합 마음 가이드 & 기록장 (with ACIM)</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             /* 감정,욕구 카드의 카테고리 색상 */
@@ -32,6 +31,13 @@
 			--bg-gray: #F2F5F8;
             --text: #333; 
 			--bg: #f8f9fa;
+
+            /* ACIM 명상 색상 고유 정의 */
+            --primary-color: #5856d6;
+            --success-color: #34c759;
+            --info-color: #007aff;
+            --text-color: #1c1c1e;
+            --secondary-text: #8e8e93;
         }
         
         html, body { 
@@ -145,30 +151,30 @@
         
         #mainTitle { width: calc(100% - 30px); margin: 10px 15px; padding: 12px; font-size: 18px; font-weight: 800; text-align: center; border: 2px solid var(--accent-blue); border-radius: 10px; color: var(--primary-blue); background: white; box-sizing: border-box; }
         
-        .record-card { background: white; border-radius: 10px; padding: 18px; margin: 0 15px 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border-top: 5px solid var(--accent-blue); }
+        .record-card { background: white; border-radius: 10px; padding: 18px; margin: 0 15px 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border-top: 5px solid var(--accent-blue); box-sizing: border-box; }
         .record-card-title { font-size: 15px; font-weight: 700; color: var(--primary-blue); margin-bottom: 4px; }
         .record-card-desc { font-size: 13px; color: #8E8E93; margin-bottom: 10px; line-height: 1.6; }
         
         /* 공통 텍스트 입력 스타일 */
-	textarea, .editable-list { 
-    	width: 100%; box-sizing: border-box; 
-    	min-height: 130px; 
-    	height: auto;     
-    	border: none; outline: none; resize: none; 
-    	font-size: 14px; background: var(--light-blue); padding: 12px; border-radius: 5px; 
-    	line-height: 1.6; color: #2c3e50; font-family: 'Pretendard', sans-serif; 
-    	white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word;
-    	overflow: hidden; 
-	}
+        textarea, .editable-list { 
+            width: 100%; box-sizing: border-box; 
+            min-height: 130px; 
+            height: auto;     
+            border: none; outline: none; resize: none; 
+            font-size: 14px; background: var(--light-blue); padding: 12px; border-radius: 5px; 
+            line-height: 1.6; color: #2c3e50; font-family: 'Pretendard', sans-serif; 
+            white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word;
+            overflow: hidden; 
+        }
         textarea::placeholder { color: #9bbad3; font-size: 13px; }
         
         .editable-list:empty::before {
-        content: attr(data-placeholder);
-        color: #9bbad3;
-        font-size: 13px;
-        pointer-events: none;
-        white-space: pre-wrap; /* 줄바꿈 유지 */
-	}
+            content: attr(data-placeholder);
+            color: #9bbad3;
+            font-size: 13px;
+            pointer-events: none;
+            white-space: pre-wrap;
+	    }
 
         .copy-btn {
             margin-top: 10px; padding: 12px; width: 100%; background: #333; color: white;
@@ -177,8 +183,8 @@
             transition: 0.2s;
         }
         .copy-btn:active { transform: scale(0.98); background: #000; }
-        .btn-q1 { background: #007AFF; } /* 파란색 */
-        .btn-q2 { background: #5856D6; } /* 보라색 */
+        .btn-q1 { background: #007AFF; }
+        .btn-q2 { background: #5856D6; }
 
         .fixed-bottom-bar {
             position: fixed; bottom: 0; left: 0; width: 100%;
@@ -191,21 +197,8 @@
             border-radius: 10px; border: none; font-weight: 700; cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s;
         }
-        .btn-save-cloud { background: #3ecf8e; color: white; flex: 1.0; padding: 12px; font-size: 15px; }
+        .btn-save-local { background: #3ecf8e; color: white; flex: 1.0; padding: 12px; font-size: 15px; }
         .btn-image { background: var(--primary-blue); color: white; flex: 1.0; padding: 12px; font-size: 15px; }
-
-        .floating-btns { position: fixed; bottom: 100px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 3000; }
-        .go-top-btn { 
-            width: 65px; height: 40px; 
-            background: var(--primary-blue); color: white; 
-            border-radius: 8px; 
-            display: flex; align-items: center; justify-content: center; cursor: pointer; 
-            opacity: 0; visibility: hidden; transform: translateY(20px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
-            font-size: 13px; font-weight: 800; z-index: 3000;
-        }
-        .go-top-btn.show { opacity: 1; visibility: visible; transform: translateY(0); }
         
         #previewBox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; flex-direction: column; z-index: 4000; padding: 20px; }
         #previewImg { max-width: 100%; max-height: 70%; border-radius: 10px; object-fit: contain; }
@@ -224,91 +217,125 @@
         .cat-ang .front, .cat-ang .back { border-color: var(--anger-core); background-color: rgba(239, 83, 80, 0.8); }
         .link-meaning { background: var(--meaning-bg); } .link-conn { background: var(--connection-bg); color: white; } .link-auto { background: var(--autonomy-bg); } .link-well { background: var(--wellbeing-bg); } .link-peace { background: var(--peace-bg); color: white; } .link-joy { background: var(--joy-bg); } .link-love { background: var(--love-bg); color: white; } .link-sad { background: var(--sadness-bg); color: white; } .link-anx { background: var(--anxiety-bg); color: white; } .link-ang { background: var(--anger-bg); color: white; }
 
-/* 기존 .card 관련 스타일 중 perspective, flip 관련은 유지하거나 제거해도 무방합니다. */
-/* 아래는 새로 추가될 모달 전용 스타일입니다. */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-.modal-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(5px);
-    display: none; /* 기본 숨김 */
-    justify-content: center;
-    align-items: center;
-    z-index: 5000;
-    padding: 20px;
-    box-sizing: border-box;
-}
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 450px;
+            max-height: 85vh;
+            border-radius: 25px;
+            position: relative;
+            padding: 30px;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
 
-.modal-content {
-    background: white;
-    width: 100%;
-    max-width: 450px;
-    max-height: 85vh;
-    border-radius: 25px;
-    position: relative;
-    padding: 30px;
-    overflow-y: auto;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-    animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+        @keyframes modalPop {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
 
-@keyframes modalPop {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
+        .modal-close {
+            position: absolute;
+            top: 15px; right: 15px;
+            width: 35px; height: 35px;
+            background: #eee;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; cursor: pointer; font-weight: bold;
+        }
 
-.modal-close {
-    position: absolute;
-    top: 15px; right: 15px;
-    width: 35px; height: 35px;
-    background: #eee;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; cursor: pointer; font-weight: bold;
-}
+        .modal-content .title { font-size: 2rem; font-weight: 950; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px;}
+        .modal-content .desc { font-size: 1rem; color: #555; margin-bottom: 20px; line-height: 1.6; text-align: center; font-weight: 800;}
 
-/* 모달 내부 디자인 보정 */
-.modal-content .title { font-size: 2rem; font-weight: 950; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px;}
-.modal-content .desc { font-size: 1rem; color: #555; margin-bottom: 20px; line-height: 1.6; text-align: center; font-weight: 800;}
+        /* ==========================================================================
+           ACIM 마음 정화 명상 고유 스타일 레이아웃 (전체 화면화 보완)
+           ========================================================================= */
+        .acim-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 0 40px 0;
+            display: flex; flex-direction: column; box-sizing: border-box; width: 100%;
+        }
+        .acim-container h1 { font-size: 1.4rem; font-weight: 800; text-align: center; margin: 5px 0; color: var(--primary-blue); }
+        .acim-container label { display: block; font-weight: 700; font-size: 15px; margin-bottom: 4px; color: var(--primary-blue); }
+        .acim-container textarea {
+            width: 100%; padding: 14px; border: none; border-radius: 8px;
+            background-color: var(--light-blue); font-family: inherit; font-size: 14px;
+            line-height: 1.6; box-sizing: border-box; resize: none; margin-bottom: 0;
+            height: auto; min-height: 130px; overflow-y: hidden; color: #2c3e50;
+        }
+        .acim-container textarea::placeholder { color: #9bbad3; font-size: 13px; }
+        
+        .acim-card {
+            background: white; border-radius: 10px; padding: 18px; 
+            margin: 15px 15px 0 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+            border-top: 5px solid var(--primary-color); box-sizing: border-box;
+        }
+        .acim-card-desc { font-size: 13px; color: #8E8E93; margin-bottom: 10px; line-height: 1.6; }
 
+        /* 읽기 전용 폼의 시각적 안정성 처리 */
+        .acim-card textarea[readonly] { background-color: #f1f5f9; color: #566a7f; cursor: not-allowed; }
+
+        .acim-audio-btn-sq { 
+            background-color: #f2f2f7; color: var(--text-color); border: 1.5px solid #DDE4EE;
+            padding: 10px 24px; font-size: 13px; font-weight: 800; border-radius: 20px; cursor: pointer;
+            transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; margin-top: 5px;
+        }
+        .acim-audio-btn-sq.playing { background-color: #ff9500; color: white; border-color: #ff9500; }
+
+        .acim-content-wrapper { flex: 1; display: flex; flex-direction: column; margin-top: 15px; }
+        
+        button.acim-main-btn {
+            width: calc(100% - 30px); margin: 15px 15px 15px; padding: 14px; 
+            background-color: var(--primary-color); color: white; border: none; 
+            border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; 
+            box-shadow: 0 4px 10px rgba(88, 86, 214, 0.2); transition: 0.2s;
+        }
+        button.acim-main-btn:active { transform: scale(0.99); }
+
+        .acim-meditation-mode { display: none; flex-direction: column; margin-top: 15px; }
+        .acim-current-step-text { 
+            font-size: 1.05rem; line-height: 1.7; text-align: center; 
+            min-height: 100px; display: flex; align-items: center; justify-content: center; 
+            white-space: pre-line; font-weight: 800; color: #2c3e50; padding: 10px 0;
+        }
+        .acim-button-group { display: flex; gap: 8px; margin: 15px 15px 15px; }
+        .acim-nav-button { flex: 1; padding: 14px 4px; background-color: white; color: var(--text-color); font-size: 14px; font-weight: 800; border-radius: 10px; border: 1.5px solid #DDE4EE; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .acim-nav-button.primary { background-color: var(--primary-color); color: white; border: none; box-shadow: 0 4px 10px rgba(88, 86, 214, 0.2); }
     </style>
 </head>
+<body>
+
+<!-- 기존 카드 상세 모달 -->
 <div id="cardModal" class="modal-overlay" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-close" onclick="closeModal()">×</div>
-        <div id="modalBody">
-            </div>
+        <div id="modalBody"></div>
     </div>
 </div>
-<body>
 
 <nav class="nav-container">
     <div class="tab-menu">
         <button class="tab-btn active" id="btn-record" onclick="showSection('record')">마음 관찰 기록</button>
+        <button class="tab-btn" id="btn-acim" onclick="showSection('acim')">정화 명상</button>
         <button class="tab-btn" id="btn-emotions" onclick="showSection('emotions')">감정 카드</button>
         <button class="tab-btn" id="btn-needs" onclick="showSection('needs')">욕구 카드</button>
     </div>
 </nav>
 
-<section id="emotions-section" class="content-section">
-    <div class="context-guide">
-        <span class="context-label">지금 관찰 중인 사건</span>
-        <div id="context-display-emotions" class="context-text-display">기록장에서 사건을 먼저 입력해 보세요.</div>
-    </div>
-    <div class="index-container" id="emotions-index"></div>
-    <div class="grid" id="emotions-grid"></div>
-</section>
-
-<section id="needs-section" class="content-section">
-    <div class="context-guide">
-        <span class="context-label">지금 관찰 중인 사건</span>
-        <div id="context-display-needs" class="context-text-display">기록장에서 사건을 먼저 입력해 보세요.</div>
-    </div>
-    <div class="index-container" id="needs-index"></div>
-    <div class="grid" id="needs-grid"></div>
-</section>
-
+<!-- 1. 마음 관찰 기록 섹션 -->
 <section id="record-section" class="content-section active">
     <div id="capture">
         <div class="admin-section" id="adminPanel">
@@ -328,7 +355,7 @@
                         <button class="btn btn-del" onclick="deleteUser()">삭제</button>
                     </div>
                 </div>
-                <div class="manage-row">
+                <div class="manage-row" style="border-bottom:none; margin-top: 5px; margin-bottom: 0; padding-bottom: 0;">
                     <span class="label" style="font-size:12px; font-weight:400; color:#8E8E93">2. 사건</span>
                     <div class="input-group">
                         <input type="text" id="newEventName" placeholder="사건명">
@@ -339,22 +366,16 @@
                         <button class="btn btn-del" onclick="deleteEvent()">삭제</button>
                     </div>
                 </div>
-                <div class="manage-row" style="border-bottom:none; margin-top: 5px; margin-bottom: 0; padding-bottom: 0;">
-                    <span class="label" style="font-size:12px; font-weight:400; color:#8E8E93">3. 클라우드에서 불러오기</span>
-                    <div class="input-group">
-                        <button class="btn" style="background:#6c757d; color:white; flex:1;" onclick="loadFromSupabase()">불러오기(다른 기기 저장 내용)</button>
-                    </div>
-                </div>
             </div>
         </div>
 
         <input type="text" id="mainTitle" placeholder="기록의 제목을 적어보세요">
 
-<div class="record-card">
-    <div class="record-card-title">1. 사건 인식</div>
-    <div class="record-card-desc">투사나 판단, 자기비난을 내려놓고 관찰된 사실만 적어보세요</div>
-    <textarea id="step1" placeholder="❌ 판단:그 사람이 나를 무시했다&#10;✅ 사실:회의 중 내가 말을 할 때 그 사람이 휴대폰을 보았다"></textarea>
-</div>
+        <div class="record-card">
+            <div class="record-card-title">1. 사건 인식</div>
+            <div class="record-card-desc">투사나 판단, 자기비난을 내려놓고 관찰된 사실만 적어보세요</div>
+            <textarea id="step1" placeholder="❌ 판단:그 사람이 나를 무시했다&#10;✅ 사실:회의 중 내가 말을 할 때 그 사람이 휴대폰을 보았다"></textarea>
+        </div>
 
         <div class="record-card">
             <div class="record-card-title">2. 감정 찾기</div>
@@ -365,7 +386,7 @@
         <div class="record-card">
             <div class="record-card-title">3. 위의 감정들을 일으킨 생각들</div>
 			<div class="record-card-desc">감정을 일으킨 내 안의 '판단'이나 '생각'들을 적어보세요.<br>(원인을 상대나 상황이 아닌 내안에서 찾아보세요.)</div>
-<div id="step3" class="editable-list" contenteditable="true" data-placeholder="❌ 그 사람이 약속시간에 늦어서 나는 화가난다.&#10;✅ 그 사람이 나를 무시했다는 생각에 화가난다."></div>
+            <div id="step3" class="editable-list" contenteditable="true" data-placeholder="❌ 그 사람이 약속시간에 늦어서 나는 화가난다.&#10;✅ 그 사람이 나를 무시했다는 생각에 화가난다."></div>
         </div>
 
         <div class="record-card">
@@ -376,8 +397,7 @@
 
         <div class="record-card">
             <div class="record-card-title">5. 욕구 강화</div>
-			<div class="record-card-desc">이 욕구가 나에게 왜 그토록 중요한 이유를 적어보세요.
-				<br>(나는 '욕구'를 원한다. 왜냐하면 ~ 때문이다. )</div>
+			<div class="record-card-desc">이 욕구가 나에게 왜 그토록 중요한 이유를 적어보세요.<br>(나는 '욕구'를 원한다. 왜냐하면 ~ 때문이다. )</div>
             <div id="step5" class="editable-list" contenteditable="true"></div>
         </div>
 
@@ -419,13 +439,81 @@
     </div>
 </section>
 
-<div class="fixed-bottom-bar" id="fixedBottomBar">
-    <button class="btn-save-cloud" onclick="saveToSupabase()">☁️ 클라우드 저장</button>
-    <button class="btn-image" id="shareBtn" onclick="makeImage()">❤️ 이미지 공유</button>
-</div>
+<!-- 2. ACIM 정화 명상 섹션 (1번 사건 및 3번 생각 완벽 동기화형) -->
+<section id="acim-section" class="content-section">
+    <div class="acim-container" id="acim-main-container">
+        <audio id="step-audio" preload="auto"></audio>
 
-<div class="floating-btns">
-    <div class="go-top-btn" id="goTop" onclick="scrollToActiveTop()">맨위로</div>
+        <!-- 타이틀 및 설명 문구를 제거하고 가이드 재생 버튼만 깔끔하게 구성 -->
+        <div class="acim-card" style="border-top: 5px solid var(--primary-blue); text-align: center;">
+            <button id="audio-toggle-sq" class="acim-audio-btn-sq" onclick="toggleAudio()">
+                <span id="audio-icon">▶ 가이드 음성 재생</span>
+            </button>
+        </div>
+
+        <!-- 정화 입력 폼 영역 (자동 연동 및 읽기 전용) -->
+        <div id="acim-input-section" class="acim-content-wrapper">
+            <div class="acim-card">
+                <label>정화하고 싶은 사건 / 기억</label>
+                <div class="acim-card-desc">🔗 마음 관찰 기록의 <span style="color:var(--accent-blue); font-weight:bold;">'1. 사건 인식'</span> 란의 텍스트가 실시간 연동됩니다.</div>
+                <textarea id="acim-event" readonly placeholder="마음 관찰 기록 탭에서 먼저 사건을 작성해 주세요."></textarea>
+            </div>
+            
+            <div class="acim-card" style="border-top: 5px solid var(--danger-red);">
+                <label>나의 판단이나 생각</label>
+                <div class="acim-card-desc">🔗 마음 관찰 기록의 <span style="color:var(--danger-red); font-weight:bold;">'3. 감정을 일으킨 생각들'</span> 란의 텍스트가 실시간 연동됩니다.</div>
+                <textarea id="acim-judgment" readonly placeholder="마음 관찰 기록 탭에서 먼저 감정을 일으킨 생각을 작성해 주세요."></textarea>
+            </div>
+            <button class="acim-main-btn" onclick="startMeditation()">정화 명상 시작하기</button>
+        </div>
+
+        <!-- 정화 플레이어 가이드 영역 -->
+        <div id="acim-meditation-section" class="acim-meditation-mode">
+            <div class="acim-card" style="border-top: 5px solid var(--primary-color);">
+                <label id="acim-step-title">단계 가이드</label>
+                <div id="acim-meditation-content" class="acim-current-step-text"></div>
+            </div>
+            
+            <div class="acim-card" style="border-top: 5px solid var(--success-color);">
+                <label id="acim-insight-label">통찰 기록</label>
+                <div class="acim-card-desc">안내를 음미하며 마음 깊은 곳에서 새롭게 채워지는 통찰이나 평온의 감각을 자유롭게 남깁니다.</div>
+                <textarea id="acim-insight" style="min-height: 140px;" placeholder="지금 이 순간 느껴지는 내면의 고요한 목소리를 받아 적어보세요..." oninput="saveCurrentInsight()"></textarea>
+            </div>
+            
+            <div class="acim-button-group" id="acim-nav-group">
+                <button id="acim-prev-btn" class="acim-nav-button" onclick="goToPrevStep()">이전 단계</button>
+                <button id="acim-home-btn" class="acim-nav-button" onclick="resetAcimMeditation()">처음으로</button>
+                <button id="acim-next-btn" class="acim-nav-button primary" onclick="goToNextStep()">다음 단계</button>
+            </div>
+            <button id="acim-reset-btn" class="acim-main-btn" style="display:none;" onclick="resetAcimMeditation()">새로운 정화 명상 시작하기</button>
+        </div>
+    </div>
+</section>
+
+<!-- 3. 감정 카드 섹션 -->
+<section id="emotions-section" class="content-section">
+    <div class="context-guide">
+        <span class="context-label">지금 관찰 중인 사건</span>
+        <div id="context-display-emotions" class="context-text-display">기록장에서 사건을 먼저 입력해 보세요.</div>
+    </div>
+    <div class="index-container" id="emotions-index"></div>
+    <div class="grid" id="emotions-grid"></div>
+</section>
+
+<!-- 4. 욕구 카드 섹션 -->
+<section id="needs-section" class="content-section">
+    <div class="context-guide">
+        <span class="context-label">지금 관찰 중인 사건</span>
+        <div id="context-display-needs" class="context-text-display">기록장에서 사건을 먼저 입력해 보세요.</div>
+    </div>
+    <div class="index-container" id="needs-index"></div>
+    <div class="grid" id="needs-grid"></div>
+</section>
+
+<!-- 통합 공통 하단 제어 바 고정 -->
+<div class="fixed-bottom-bar" id="fixedBottomBar">
+    <button class="btn-save-local" onclick="triggerManualSave()">💾 브라우저 저장</button>
+    <button class="btn-image" id="shareBtn" onclick="makeImage()">❤️ 이미지 공유</button>
 </div>
 
 <div id="previewBox">
@@ -434,106 +522,41 @@
 </div>
 
 <script>
-// 데이터 배열 (감정/욕구 데이터 생략 없이 그대로 유지)
+/* ==========================================================================
+   기록장 및 카드 데이터 영역
+   ========================================================================== */
 const needsData = [
     { name: "효율성",cat: "cat-auto",desc: "최소한의 에너지나 자원으로 최대한의 결과물을 얻고, 질서 있게 일을 처리하고 싶은 마음",sat: ["뿌듯하다", "경쾌하다", "홀가분하다"],unsat: ["허탈하다", "조급하다", "무기력하다"],action: "우선순위를 정하고 불필요한 단계를 줄여보세요."},
-   {name: "효능감", 
-  cat: "cat-auto", 
-  desc: "어떤 일을 성공적으로 수행할 수 있다는 자신의 능력에 대한 믿음과 확신을 얻고 싶은 마음", 
-  sat: ["자신 있다", "활기차다", "든든하다"], 
-  unsat: ["막막하다", "회의적이다", "무력하다"], 
-  action: "아주 작은 목표를 설정하고 그것을 완수하는 경험을 반복해보세요." 
-},
+    { name: "효능감", cat: "cat-auto", desc: "어떤 일을 성공적으로 수행할 수 있다는 자신의 능력에 대한 믿음과 확신을 얻고 싶은 마음", sat: ["자신 있다", "활기차다", "든든하다"], unsat: ["막막하다", "회의적이다", "무력하다"], action: "아주 작은 목표를 설정하고 그것을 완수하는 경험을 반복해보세요." },
     { name: "자유•자율성", cat: "cat-auto", desc: "자신의 가치와 꿈에 따라 스스로 선택하고 행동하고 싶은 마음", sat: ["행복하다", "만족하다"], unsat: ["답답하다", "억울하다"], action: "나만의 시간을 확보하세요." },
-    
-    { 
-  name: "공정함", 
-  cat: "cat-auto", // 혹은 시스템/질서 관련 카테고리가 있다면 분리 가능하나, 연결/사회적 관계 맥락 유지
-  desc: "내가 노력한 만큼 정당한 대가와 대우를 받고, 치우침 없이 평등하게 다루어지길 바라는 욕구", 
-  sat: ["홀가분하다", "신뢰감을 느끼다"], 
-  unsat: ["억울하다", "분개하다"], 
-  action: "개인의 편견을 내려놓고 정해진 기준과 원칙에 따라 투명하게 대치해보세요." 
-},
-{ 
-  name: "명확함", 
-  cat: "cat-auto", // 혹은 인지/이해 관련 카테고리가 있다면 배치 가능하나, 모호함에서 벗어나 주체적으로 판단하려는 맥락 유지
-  desc: "상황이나 정보, 상대의 의도를 왜곡 없이 투명하고 확실하게 알고 싶은 욕구", 
-  sat: ["홀가분하다", "홀가분하다"], // 혹은 '안심되다', '시원하다'
-  unsat: ["혼란스럽다", "답답하다"], 
-  action: "모호한 짐작을 내려놓고, 구체적인 사실을 확인하거나 상대에게 명확한 질문을 건네보세요." 
-},
+    { name: "공정함", cat: "cat-auto", desc: "내가 노력한 만큼 정당한 대가와 대우를 받고, 치우침 없이 평등하게 다루어지길 바라는 욕구", sat: ["홀가분하다", "신뢰감을 느끼다"], unsat: ["억울하다", "분개하다"], action: "개인의 편견을 내려놓고 정해진 기준과 원칙에 따라 투명하게 대치해보세요." },
+    { name: "명확함", cat: "cat-auto", desc: "상황이나 정보, 상대의 의도를 왜곡 없이 투명하고 확실하게 알고 싶은 욕구", sat: ["홀가분하다", "홀가분하다"], unsat: ["혼란스럽다", "답답하다"], action: "모호한 짐작을 내려놓고, 구체적인 사실을 확인하거나 상대에게 명확한 질문을 건네보세요." },
     { name: "선택", cat: "cat-auto", desc: "나의 의지로 방향을 정하고 결정하고 싶은 마음", sat: ["자랑스럽다", "기쁘다"], unsat: ["답답하다", "억울하다"], action: "사소한 결정부터 직관에 따라 결정해 보세요." },
     { name: "혼자만의 시간과 공간", cat: "cat-auto", desc: "온전히 나 자신과 마주하고 싶은 욕구", sat: ["편안하다", "만족하다"], unsat: ["답답하다", "불편하다"], action: "아지트에서 1시간 동안 집중해 보세요." },
     { name: "자기표현", cat: "cat-auto", desc: "나만의 고유한 생각과 개성을 외부로 드러내고 싶은 욕구", sat: ["기쁘다", "자랑스럽다"], unsat: ["답답하다", "부끄럽다"], action: "독창적인 생각을 기록해 보세요." },
-  { 
-  name: "자기주도", 
-  cat: "cat-auto", 
-  desc: "나의 선택과 의지에 따라 삶의 방향과 행동을 스스로 결정하고 싶은 욕구", 
-  sat: ["자유롭다", "당당하다", "활기차다"], 
-  unsat: ["무력하다", "답답하다", "억울하다"], 
-  action: "오늘 내가 스스로 선택할 수 있는 작은 일 하나를 정해보세요." 
-},
-      { name: "우정", cat: "cat-conn", desc: "서로 아끼고 신뢰를 나누고 싶은 바람", sat: ["사랑스럽다", "든든하다"], unsat: ["서운하다", "외롭다"], action: "친구에게 안부를 물어보세요." },
+    { name: "자기주도", cat: "cat-auto", desc: "나의 선택과 의지에 따라 삶의 방향과 행동을 스스로 결정하고 싶은 욕구", sat: ["자유롭다", "당당하다", "활기차다"], unsat: ["무력하다", "답답하다", "억울하다"], action: "오늘 내가 스스로 선택할 수 있는 작은 일 하나를 정해보세요." },
+    { name: "우정", cat: "cat-conn", desc: "서로 아끼고 신뢰를 나누고 싶은 바람", sat: ["사랑스럽다", "든든하다"], unsat: ["서운하다", "외롭다"], action: "친구에게 안부를 물어보세요." },
     { name: "공동체", cat: "cat-conn", desc: "어딘가에 속해 서로 돕고 기여하며 연결되고 싶은 욕구", sat: ["뿌듯하다", "든든하다"], unsat: ["소외되다", "불안하다"], action: "이웃에게 가벼운 인사를 건네보세요." },
     { name: "이해", cat: "cat-conn", desc: "나의 마음이 정확히 전달되고 수용되기를 바라는 마음", sat: ["감동하다", "편안하다"], unsat: ["서운하다", "답답하다"], action: "소통의 오해를 확인해 보세요." },
     { name: "존중", cat: "cat-conn", desc: "가치를 인정받고 소중히 다뤄지기를 바라는 마음", sat: ["뿌듯하다", "든든하다"], unsat: ["억울하다", "속상하다"], action: "받고 싶은 대우를 요청하세요." },
-{ 
-  name: "상호존중", 
-  cat: "cat-conn", 
-  desc: "서로의 다름을 인정하고, 품격 있는 태도로 서로의 존재와 가치를 소중히 여기고 싶은 마음", 
-  sat: ["존중받다", "든든하다", "편안하다"], 
-  unsat: ["무시당하다", "불쾌하다", "비참하다"], 
-  action: "상대방의 말을 끝까지 듣고 비판 없이 수용하는 연습을 해보세요." 
-},
-   
+    { name: "상호존중", cat: "cat-conn", desc: "서로의 다름을 인정하고, 품격 있는 태도로 서로의 존재와 가치를 소중히 여기고 싶은 마음", sat: ["존중받다", "든든하다", "편안하다"], unsat: ["무시당하다", "불쾌하다", "비참하다"], action: "상대방의 말을 끝까지 듣고 비판 없이 수용하는 연습을 해보세요." },
     { name: "관심", cat: "cat-conn", desc: "누군가 내 존재를 알아주기를 바라는 마음", sat: ["반갑다", "행복하다"], unsat: ["서운하다", "외롭다"], action: "나에 대해 질문해달라고 요청하세요." },
     { name: "소통", cat: "cat-conn", desc: "생각과 느낌을 주고받으며 연결을 맺는 행위", sat: ["반갑다", "재미있다"], unsat: ["답답하다", "어색하다"], action: "끝까지 듣고 요약해 보세요." },
     { name: "신뢰", cat: "cat-conn", desc: "믿고 의지할 수 있는 단단한 관계의 토대", sat: ["든든하다", "편안하다"], unsat: ["불안하다", "걱정하다"], action: "작은 도움을 요청해 보세요." },
     { name: "협력", cat: "cat-conn", desc: "공통 목표를 위해 힘을 합치고 싶은 바람", sat: ["든든하다", "뿌듯하다"], unsat: ["답답하다", "귀찮다"], action: "상대에게 도움을 요청하세요." },
     { name: "연결•친밀함", cat: "cat-conn", desc: "정서적으로 가까워져 유대감을 느끼고 싶은 욕구", sat: ["사랑스럽다", "설레다"], unsat: ["외롭다", "서운하다"], action: "눈을 맞추며 대화해 보세요." },
-    { name: "어울리기", cat: "cat-conn", desc: "즐겁게 섞여 사회적인 에너지를 나누고 싶은 바람", sat: ["신나다", "재미있다"], unsat: ["어색하다", "외롭다"], action: "가벼운 티타임에 참석하세요." },
+    { name: "어울리기", cat: "cat-conn", desc: "즐겁게 섞여 사회적인 에너지를 나누고 싶은 바람", sat: ["신나다", "재미있다"], unsat: ["지루하다", "답답하다"], action: "가벼운 티타임에 참석하세요." },
     { name: "공감", cat: "cat-conn", desc: "상대의 마음을 내 것처럼 느끼고 싶은 욕구", sat: ["감동하다", "따뜻하다"], unsat: ["서운하다", "외롭다"], action: "공감의 한마디를 건네보세요." },
-   { 
-  name: "포용", 
-  cat: "cat-conn", 
-  desc: "나의 못난 부분이나 실수, 다름까지도 조건 없이 있는 그대로 받아들여지길 바라는 욕구", 
-  sat: ["안심되다", "든든하다"], 
-  unsat: ["위축되다", "소외감을 느끼다"], 
-  action: "상대의 판단이나 평가 없이 있는 그대로 수용하는 태도를 보여주세요." 
-},
-
-{ 
-  name: "수용", 
-  cat: "cat-conn", 
-  desc: "나의 생각, 감정, 현재의 모습을 왜곡이나 저항 없이 있는 그대로 받아들여 주길 바라는 욕구", 
-  sat: ["자유롭다", "편안하다"], 
-  unsat: ["답답하다", "거부당하다"], 
-  action: "상대의 이야기를 바꾸려 하거나 조언하려 하지 말고, '그랬구나' 하며 있는 그대로 비춰주세요." 
-},
-
-{ 
-  name: "위로", 
-  cat: "cat-conn", 
-  desc: "나의 슬픔과 아픔, 지친 마음을 누군가 알아주고 다독여주길 바라는 욕구", 
-  sat: ["위안이 되다", "평온하다"], 
-  unsat: ["속상하다", "막막하다"], 
-  action: "상대의 힘든 마음을 묵묵히 들어주며 따뜻한 체온이나 가벼운 신체 접촉을 나눠보세요." 
-},
+    { name: "포용", cat: "cat-conn", desc: "나의 못난 부분이나 실수, 다름까지도 조건 없이 있는 그대로 받아들여지길 바라는 욕구", sat: ["안심되다", "든든하다"], unsat: ["위축되다", "소외감을 느끼다"], action: "상대의 판단이나 평가 없이 있는 그대로 수용하는 태도를 보여주세요." },
+    { name: "수용", cat: "cat-conn", desc: "나의 생각, 감정, 현재의 모습을 왜곡이나 저항 없이 있는 그대로 받아들여 주길 바라는 욕구", sat: ["자유롭다", "편안하다"], unsat: ["답답하다", "거부당하다"], action: "상대의 이야기를 바꾸려 하거나 조언하려 하지 말고, '그랬구나' 하며 있는 그대로 비춰주세요." },
+    { name: "위로", cat: "cat-conn", desc: "나의 슬픔과 아픔, 지친 마음을 누군가 알아주고 다독여주길 바라는 욕구", sat: ["위안이 되다", "평온하다"], unsat: ["속상하다", "막막하다"], action: "상대의 힘든 마음을 묵묵히 들어주며 따뜻한 체온이나 가벼운 신체 접촉을 나눠보세요." },
     { name: "마음알아주기", cat: "cat-conn", desc: "있는 그대로 수용받고 싶은 욕구", sat: ["감동하다", "든든하다"], unsat: ["억울하다", "서럽다"], action: "감정의 이름을 불러주세요." },
     { name: "소속감", cat: "cat-conn", desc: "집단의 일원으로서 안정감을 느끼고 싶은 마음", sat: ["든든하다", "편안하다"], unsat: ["외롭다", "불안하다"], action: "작은 역할을 자원해 보세요." },
     { name: "도움•지지", cat: "cat-conn", desc: "어려울 때 기댈 수 있는 격려가 필요한 마음", sat: ["든든하다", "감사하다"], unsat: ["막막하다", "서럽다"], action: "명확히 도움을 요청하세요." },
     { name: "나눔", cat: "cat-conn", desc: "가진 것을 전달하며 기쁨을 얻고 싶은 마음", sat: ["행복하다", "뿌듯하다"], unsat: ["속상하다", "허탈하다"], action: "깜짝 선물을 해보세요." },
     { name: "배려", cat: "cat-conn", desc: "타인의 형편을 살피고 마음을 쓰는 성품", sat: ["뿌듯하다", "따뜻하다"], unsat: ["속상하다", "서운하다"], action: "주변 필요를 살펴보세요." },
-  { 
-  name: "정서적 배려", 
-  cat: "cat-conn", 
-  desc: "자신의 감정을 보살피고, 타인의 마음 상태를 세심하게 살피며 연결되고 싶은 마음", 
-  sat: ["따뜻하다", "연결되다", "안심하다"], 
-  unsat: ["서운하다", "외롭다", "단절되다"], 
-  action: "상대방의 감정 단어에 귀를 기울이고 공감의 한마디를 건네보세요." 
-},
- 
-     { name: "보살핌", cat: "cat-conn", desc: "누군가를 돌보거나 돌봄 받기를 바라는 본능", sat: ["사랑스럽다", "든든하다"], unsat: ["외롭다", "불안하다"], action: "나 자신을 돌보세요." },
+    { name: "정서적 배려", cat: "cat-conn", desc: "자신의 감정을 보살피고, 타인의 마음 상태를 세심하게 살피며 연결되고 싶은 마음", sat: ["따뜻하다", "연결되다", "안심하다"], unsat: ["서운하다", "외롭다", "단절되다"], action: "상대방의 감정 단어에 귀를 기울이고 공감의 한마디를 건네보세요." },
+    { name: "보살핌", cat: "cat-conn", desc: "누군가를 돌보거나 돌봄 받기를 바라는 본능", sat: ["사랑스럽다", "든든하다"], unsat: ["외롭다", "불안하다"], action: "나 자신을 돌보세요." },
     { name: "사랑", cat: "cat-conn", desc: "생명 그 자체를 아끼고 소중히 여기는 에너지", sat: ["사랑스럽다", "행복하다"], unsat: ["슬프다", "서럽다"], action: "사랑해라고 전하세요." },
     { name: "공기", cat: "cat-well", desc: "생명 유지를 위한 필수적인 에너지", sat: ["편안하다", "만족하다"], unsat: ["답답하다", "괴롭다"], action: "심호흡을 하세요." },
     { name: "음식•주거", cat: "cat-well", desc: "안전한 기반과 에너지를 얻고 싶은 마음", sat: ["든든하다", "편안하다"], unsat: ["불안하다", "걱정하다"], action: "건강한 한 끼를 드세요." },
@@ -569,14 +592,7 @@ const needsData = [
     { name: "꿈", cat: "cat-meaning", desc: "이상적 가치를 실현하고 싶은 열망", sat: ["기대하다", "설레다"], unsat: ["막막하다", "좌절하다"], action: "계획을 세우세요." },
     { name: "창조성", cat: "cat-meaning", desc: "생동감을 느끼고 싶은 욕구", sat: ["신나다", "설레다"], unsat: ["지루하다", "답답하다"], action: "일상에 변화를 시도하세요." },
     { name: "자신감", cat: "cat-meaning", desc: "능력을 믿고 마주하고 싶은 에너지", sat: ["자랑스럽다", "신나다"], unsat: ["위축되다", "초조하다"], action: "기억 3가지를 되새기세요." },
-    { 
-  name: "자부심", 
-  cat: "cat-meaning", 
-  desc: "자신의 능력이나 성취, 존재 가치에 대해 스스로 당당하고 명예롭게 여기고 싶은 마음", 
-  sat: ["당당하다", "자랑스럽다", "충만하다"], 
-  unsat: ["초라하다", "부끄럽다", "위축되다"], 
-  action: "오늘 내가 해낸 작은 성과나 나의 긍정적인 면을 세 가지만 기록해보세요." 
-},
+    { name: "자부심", cat: "cat-meaning", desc: "자신의 능력이나 성취, 존재 가치에 대해 스스로 당당하고 명예롭게 여기고 싶은 마음", sat: ["당당하다", "자랑스럽다", "충만하다"], unsat: ["초라하다", "부끄럽다", "위축되다"], action: "오늘 내가 해낸 작은 성과나 나의 긍정적인 면을 세 가지만 기록해보세요." },
     { name: "축하", cat: "cat-meaning", desc: "기쁜 순간을 기리고 싶은 마음", sat: ["기쁘다", "감동하다"], unsat: ["서운하다", "속상하다"], action: "작은 보상을 선물하세요." },
     { name: "존재감", cat: "cat-meaning", desc: "의미 있는 존재로 인식되고 싶은 마음", sat: ["자랑스럽다", "뿌듯하다"], unsat: ["위축되다", "허탈하다"], action: "당당히 드러내세요." },
 	{ name: "평온함", cat: "cat-meaning", desc: "마음이 동요 없이 고요하고 안녕한 상태", sat: ["평화롭다", "안온하다"], unsat: ["불안하다", "초조하다"],action: "숨을 깊게 고르며 이 순간을 음미하세요."}
@@ -590,7 +606,7 @@ const emotionsData = [
     { name: "만족하다", cat: "cat-joy", desc: "마음이 넉넉해져 있는 그대로를 긍정하는 여유", sit: "몰두한 일을 마친 뒤 쉴 때", body: "몸의 모든 근육이 이완되고 미각이나 후각이 예민해짐", aff: "나는 이미 충분하며 지금 이대로 만족합니다." },
     { name: "든든하다", cat: "cat-joy", desc: "믿을 수 있는 지지가 있음을 확인한 강인함", sit: "나를 믿어주는 사람의 격려를 받았을 때", body: "척추가 곧게 펴지는 느낌과 함께 아랫배에 힘이 들어감", aff: "소중한 존재들이 나를 지켜줍니다." },
     { name: "자랑스럽다", cat: "cat-joy", desc: "이뤄낸 성취를 대견하게 여기는 마음", sit: "어려운 도전을 끝내거나 성장을 볼 때", body: "어깨가 펴지고 고개가 들리며 심장이 힘차게 뜀", aff: "나는 나의 노력을 진심으로 자랑스러워합니다." },
-    { name: "편안하다", cat: "cat-joy", desc: "긴장이 풀리고 안정을 되찾은 상태", sit: "따뜻한 차를 마시며 쉴 때", body: "눈꺼풀이 가벼워지고 손끝과 발끝까지 이완됨", aff: "나는 모든 긴장을 내려놓고 평온에 머뭅니다." },
+    { name: "편안하다", cat: "cat-joy", desc: "긴장이 풀리고 안정을 되찾은 상태", sit: "따뜻한 차를 마시며 쉴 때", body: "눈꺼풀이 가벼워지고 손끝과 발끝까지 이완됨", aff: "나는 모든 긴장을 내려놓고 평온에 머눕니다." },
     { name: "뿌듯하다", cat: "cat-joy", desc: "노력이 결실을 맺어 내면이 꽉 찬 성취감", sit: "하루의 할 일을 성실히 마친 순간", body: "가슴 상부가 넓게 확장되는 느낌과 가벼운 고양감", aff: "성실하게 채워온 나의 시간이 자랑스럽습니다." },
     { name: "기대하다", cat: "cat-joy", desc: "긍정적 변화를 상상하며 샘솟는 활기", sit: "새로운 도전이나 기다리던 만남 전", body: "몸이 앞으로 기울어지고 눈빛이 반짝이며 에너지가 상승함", aff: "찾아올 멋진 미래를 설레며 기다립니다." },
     { name: "반갑다", cat: "cat-joy", desc: "존재를 다시 마주하며 연결이 회복되는 기쁨", sit: "친한 친구를 오랜만에 만났을 때", body: "목소리 톤이 높아지고 손동작이 커지며 심박수가 증가함", aff: "만남이 주는 활기찬 에너지를 맞이합니다." },
@@ -619,14 +635,8 @@ const emotionsData = [
     { name: "답답하다", cat: "cat-ang", desc: "소통과 자유가 해소되지 못하고 갇힌 기분", sit: "말이 통하지 않거나 정체되어 있을 때", body: "가슴 한복판이 꽉 막힌 느낌과 목이 조이는 듯함", aff: "답답함은 변화를 원한다는 신호입니다." },
     { name: "억울하다", cat: "cat-ang", desc: "공정함이 훼손되었다고 느껴지는 분노", sit: "오해받거나 기여가 무시당했을 때", body: "눈시울이 뜨거워지고 이가 갈리며 주먹에 힘이 들어감", aff: "진실은 나를 지켜줄 것입니다." },
     { name: "짜증나다", cat: "cat-ang", desc: "불만족이 반복되어 날카로운 상태", sit: "피로가 쌓인 상태에서 소음을 겪을 때", body: "얼굴 근육이 팽팽해지고 목소리가 날카워지며 미간을 찌푸림", aff: "나는 감정의 주인이며 평온을 선택합니다." },
-{
-  "name": "불쾌하다",
-  "cat": "cat-ang",
-  "desc": "어떤 사물이나 상황이 마음에 들지 않아 기분이 좋지 않고 꺼림칙한 상태",
-  "sit": "무례한 행동을 목격하거나, 위생적이지 못한 환경에 처했을 때",
-  "body": "미간이 찌푸려지고 몸이 움츠러들며, 기운이 소모되는 느낌이 듦",
-  "aff": "불편한 원인을 살피고, 나를 보호하기 위해 적절한 거리를 둡니다."
-},	{ name: "분하다", cat: "cat-ang", desc: "부당한 일로 울분이 가득 찬 상태", sit: "노력을 가로채이거나 상처 입었을 때", body: "얼굴이 붉어지고 몸에 열이 오르며 거친 숨을 내쉼", aff: "지혜로운 대처를 통해 나를 지겠습니다." },
+    { name: "불쾌하다", cat: "cat-joy", desc: "어떤 사물이나 상황이 마음에 들지 않아 기분이 좋지 않고 꺼림칙한 상태", sit: "무례한 행동을 목격하거나, 위생적이지 못한 환경에 처했을 때", body: "미간이 찌푸려지고 몸이 움츠러들며, 기운이 소모되는 느낌이 듦", aff: "불편한 원인을 살피고, 나를 보호하기 위해 적절한 거리를 둡니다." },
+    { name: "분하다", cat: "cat-ang", desc: "부당한 일로 울분이 가득 찬 상태", sit: "노력을 가로채이거나 상처 입었을 때", body: "얼굴이 붉어지고 몸에 열이 오르며 거친 숨을 내쉼", aff: "지혜로운 대처를 통해 나를 지겠습니다." },
     { name: "밉다", cat: "cat-ang", desc: "원망스러워 거리감을 두고 싶은 감정", sit: "진심을 무시한 상대가 떠오를 때", body: "입술을 굳게 다물게 되고 상대 쪽으로 고개를 돌리기 싫어짐", aff: "미움 대신 나를 아끼는 마음을 채웁니다." },
     { name: "원망스럽다", cat: "cat-ang", desc: "고통의 책임을 상대에게 돌리는 아픈 마음", sit: "결정적 순간에 곁에 없었던 이에 대한 서운함", body: "가슴 깊은 곳이 쓰리고 명치 부근이 딱딱해짐", aff: "기대를 내려놓고 스스로를 돕습니다." },
     { name: "얄밉다", cat: "cat-ang", desc: "타인의 행동이 공정함에 어긋나 보이는 거부감", sit: "책임을 회피하며 이득만 챙기는 이를 볼 때", body: "코웃음이 나거나 눈매가 가늘어지며 혀를 차게 됨", aff: "타인에게 휘둘리지 않고 품위를 유지합니다." },
@@ -634,96 +644,40 @@ const emotionsData = [
     { name: "불편하다", cat: "cat-ang", desc: "평온이 깨져 대상을 피하고 싶은 방어 상태", sit: "가치관이 맞지 않는 사람과 있을 때", body: "몸이 뻣뻣해지고 자꾸 자세를 바꾸게 되며 시선을 피함", aff: "나의 경계를 지키며 지혜롭게 지나갑니다." },
     { name: "어색하다", cat: "cat-ang", desc: "분위기 속에서 행동이 부자연스러운 상태", sit: "서먹한 이와 단둘이 남겨졌을 때", body: "손을 어디에 둘지 모르겠고 미소가 부자연스러움", aff: "어색함조차 과정입니다. 가벼운 미소를 지어봅니다." },
     { name: "황당하다", cat: "cat-ang", desc: "비논리적 일로 어처구니가 없는 상태", sit: "터무니없는 거짓말을 들었을 때", body: "입이 벌어지고 헛웃음이 나오며 힘이 탁 풀림", aff: "황당한 일에 소중한 감정을 쏟지 않습니다." },
-    { 
-  name: "어이없다", 
-  cat: "cat-ang", // 황당함과 분노가 섞인 감정 카테고리
-  desc: "일이 너무 뜻밖이거나 기가 막혀서 말문이 막히고 기가 차는 상태", 
-  sit: "상식 밖의 행동이나 도를 넘은 무례함을 목격했을 때", 
-  body: "순간적으로 머릿속이 하얘지고, 헛웃음이 나며 가슴이 답답해짐", 
-  aff: "어이없는 상황에 휘둘리기보다, 내 중심을 잡고 상황과 한 걸음 거리를 둡니다." 
-},
-    { name: "속상하다", cat: "cat-ang", desc: "슬픔과 화가 미묘하게 섞인 상태", sit: "가까운 이가 나의 배려를 무시할 때", body: "코끝이 찡해지고 가슴 중앙이 아릿하게 저려옴", aff: "나는 존중받을 자격이 있습니다." },
+    { name: "어이없다", cat: "cat-ang", desc: "일이 너무 뜻밖이거나 기가 막혀서 말문이 막히고 기가 차는 상태", sit: "상식 밖의 행동이나 도를 넘은 무례함을 목격했을 때", body: "순간적으로 머릿속이 하얘지고, 헛웃음이 나며 가슴이 답답해짐", aff: "어이없는 상황에 휘둘리기보다, 내 중심을 잡고 상황과 한 걸음 거리를 둡니다." },
+    { name: "속상하다", cat: "cat-ang", desc: "#슬픔과 화가 미묘하게 섞인 상태", sit: "가까운 이가 나의 배려를 무시할 때", body: "코끝이 찡해지고 가슴 중앙이 아릿하게 저려옴", aff: "나는 존중받을 자격이 있습니다." },
     { name: "서운하다", cat: "cat-sad", desc: "연결이 부족해 씁쓸함이 남는 상태", sit: "특별한 날을 잊었거나 무관심할 때", body: "입꼬리가 처지고 가슴이 텅 빈 듯한 허전함이 느껴짐", aff: "서운함은 더 사랑받고 싶은 마음입니다." },
     { name: "외롭다", cat: "cat-sad", desc: "이해받지 못해 섬처럼 느껴지는 쓸쓸함", sit: "군중 속이나 혼자 남겨진 밤", body: "팔다리가 차갑게 느껴지고 몸이 작아지는 듯한 오한", aff: "나는 나 자신과 먼저 친해지겠습니다." },
     { name: "슬프다", cat: "cat-sad", desc: "상실의 아픔을 수용하고 정화하는 애도", sit: "이별이나 아픈 진실을 마주할 때", body: "눈시울이 뜨거워지고 온몸에 힘이 빠지며 가슴이 무거움", aff: "눈물은 상처 입은 마음을 씻어줍니다." },
     { name: "소외되다", cat: "cat-sad", desc: "연결감을 잃고 단절된 듯한 마음", sit: "모임에 초대받지 못하거나 대화에 낄 수 없을 때", body: "목이 메이고 가슴 부근이 싸늘하게 식는 느낌", aff: "나는 그 자체로 소중하며 진정한 곳을 찾을 것입니다." },
     { name: "우울하다", cat: "cat-sad", desc: "에너지가 낮아져 마음이 무거운 상태", sit: "무력감이 지속되거나 단절된 느낌일 때", body: "눈꺼풀이 무겁고 온몸이 젖은 솜처럼 바닥으로 가라앉음", aff: "이 또한 날씨일 뿐입니다. 해는 뜹니다." },
-    { name: "무기력하다", cat: "cat-sad", desc: "아무것도 할 힘이 없어 에너지가 바닥난 상태", sit: "반복된 실패나 번아웃이 왔을 때", body: "손가락 하나 까딱하기 싫고 목소리에 생기가 전혀 없음", aff: "지금은 뿌리를 내리는 쉼의 시간입니다." },
+    { name: "무기력하다", cat: "cat-sad", desc: "아무것도 할 힘이 없어 에너지가 바닥난 상태", sit: "반복된 실패나 번아웃이 왔을 때", body: "손가락 하나 까딱하기 싫고목소리에 생기가 전혀 없음", aff: "지금은 뿌리를 내리는 쉼의 시간입니다." },
     { name: "무력하다", cat: "cat-sad", desc: "상황을 바꿀 수 없다는 느낌에 압도된 마음", sit: "반복되는 갈등 속에 해결책이 없을 때", body: "어깨가 축 처지고 심장 박동이 아주 느리고 약해짐", aff: "아무것도 하지 않아도 괜찮습니다." },
     { name: "후회하다", cat: "cat-sad", desc: "과거의 선택을 아쉬워하는 성찰", sit: "기회를 놓쳤거나 상처를 주었을 때", body: "가슴을 치고 싶거나 머리를 감싸 쥐게 되며 속이 쓰림", aff: "과거의 실수에서 지혜를 배워 성장합니다." },
     { name: "좌절하다", cat: "cat-sad", desc: "의지가 꺾이고 희망이 사라진 아픈 시간", sit: "노력이 실패로 돌아가 엄두가 나지 않을 때", body: "무릎에 힘이 풀리고 가슴이 턱 막혀 숨쉬기가 힘듦", aff: "좌절은 멈춤이지 끝이 아닙니다." },
     { name: "귀찮다", cat: "cat-sad", desc: "에너지를 최소화하고 싶은 정지 신호", sit: "해야 할 일은 많지만 몸이 무거울 때", body: "눈을 감고 싶고 몸의 반응 속도가 현저히 느려짐", aff: "쉼이 필요하다는 신호임을 인정합니다." },
     { name: "지루하다", cat: "cat-sad", desc: "의미를 발견하지 못해 시간이 정체된 상태", sit: "단조로운 일상이 반복될 때", body: "하품이 나오고 턱을 괴거나 몸을 비틀게 됨", aff: "지루함 속에 영감의 씨앗이 있습니다." },
-    { name: "피곤하다", cat: "cat-sad", desc: "쉼을 강력하게 요청하는 고갈 신호", sit: "쉼 없이 달려와 모든 의욕이 사라질 때", body: "머리가 무겁고 눈이 따가우며 뒷목이 뻣뻣함", aff: "고생한 나에게 깊은 휴식을 선물합니다." },
+    { name: "피곤하다", cat: "cat-sad", desc: "쉼을 강력하게 요청하는 고갈 신호", sit: "쉼 없이 달려와 모든 의욕이 사라질 때", body: "머리가 무겁고 눈이 따가우며 뒷목이 빳빳함", aff: "고생한 나에게 깊은 휴식을 선물합니다." },
     { name: "부럽다", cat: "cat-sad", desc: "타인의 처지로 결핍이 자극되는 시기", sit: "친구의 성공 소식을 보았을 때", body: "시선이 자꾸 아래로 향하고 가슴 한구석이 쿡쿡 쑤심", aff: "나에게는 나만의 고유한 행복이 이미 있습니다." },
     { name: "괴롭다", cat: "cat-sad", desc: "고통이 극심하여 벗어나고 싶은 간절함", sit: "상처가 떠오르거나 현실이 힘들 때", body: "온몸의 근육이 뒤틀리는 듯하고 가슴이 찢어지는 통증", aff: "고통을 따뜻하게 안아주며 치유합니다." },
     { name: "그리워하다", cat: "cat-sad", desc: "부재하는 대상과 연결되고 싶은 상태", sit: "이별한 이의 유품이나 흔적을 볼 때", body: "가슴 부근이 아련하게 저리고 목소리가 떨림", aff: "그리움은 내가 사랑했다는 증거입니다." },
     { name: "실망하다", cat: "cat-sad", desc: "기대가 무너져 허탈하고 신뢰가 흔들림", sit: "믿었던 이의 무심한 모습을 보았을 때", body: "몸에서 기운이 빠져나가며 입안이 마르는 느낌", aff: "실망은 환상이 걷힌 자리에 진실을 세우는 일입니다." },
     { name: "서럽다", cat: "cat-sad", desc: "억울함과 슬픔이 북받쳐 오르는 아픈 마음", sit: "혼자 아프거나 오해받을 때", body: "어깨를 떨며 흐느끼게 되고 가슴이 요동침", aff: "내 마음의 울음을 충분히 들어주겠습니다." },
     { name: "안타깝다", cat: "cat-sad", desc: "상황을 개선해주고 싶으나 뜻대로 안 됨", sit: "도움을 주고 싶지만 지켜만 봐야 할 때", body: "손바닥을 비비거나 발을 동동 구르며 가슴이 타는 듯함", aff: "나의 기도가 작은 위로가 되길 바랍니다." },
-	{ 
-  name: "아쉽다", 
-  cat: "cat-sad", 
-  desc: "바라던 바가 채워지지 않아 미련이 남음", 
-  sit: "조금만 더 노력했거나 기회가 있었다면 결과가 달랐을 때", 
-  body: "입술을 깨물거나 한숨을 깊게 쉬며 가슴 한구석이 허전함", 
-  aff: "다음에는 당신이 원하는 결과를 꼭 얻기를 응원합니다." 
-},
-  { name: "허탈하다", cat: "cat-sad", desc: "결과가 무너져 에너지가 빠져나간 허전함", sit: "노력이 수포로 돌아갔을 때", body: "팔다리에 힘이 하나도 없고 가슴 속이 텅 빈 구멍 같음", aff: "비워진 마음을 인정하며 새로운 에너지를 기다립니다." }
+    { name: "아쉽다", cat: "cat-sad", desc: "바라던 바가 채워지지 않아 미련이 남음", sit: "조금만 더 노력했거나 기회가 있었다면 결과가 달랐을 때", body: "입술을 깨물거나 한숨을 깊게 쉬며 가슴 한구석이 허전함", aff: "다음에는 당신이 원하는 결과를 꼭 얻기를 응원합니다." },
+    { name: "허탈하다", cat: "cat-sad", desc: "결과가 무너져 에너지가 빠져나간 허전함", sit: "노력이 수포로 돌아갔을 때", body: "팔다리에 힘이 하나도 없고 가슴 속이 텅 빈 구멍 같음", aff: "비워진 마음을 인정하며 새로운 에너지를 기다립니다." }
 ];
 
-/* --- Supabase 연동 --- */
-const SUPABASE_URL = 'https://ocghxynajjbkpbyljxzg.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jZ2h4eW5hampia3BieWxqeHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTg4MTksImV4cCI6MjA5MTI3NDgxOX0.weaiOCV0UMjsfSmEI_WU_0L4qJUOGRrtoWEwPKN26is';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-async function saveToSupabase() {
-    const user = document.getElementById("userSelect").value;
-    const event = document.getElementById("eventSelect").value;
-    if(!user || !event || user === "사용자 없음" || event === "사건 없음") { alert("사용자와 사건을 먼저 설정해주세요."); return; }
-    const saveData = {
-        user_id: user, event_name: event,
-        title: document.getElementById("mainTitle").value,
-        step1: document.getElementById("step1").value,
-        step2: document.getElementById("step2").value,
-        step3: document.getElementById("step3").innerText,
-        step4: document.getElementById("step4").value,
-        step5: document.getElementById("step5").innerText,
-        step6: document.getElementById("step6").innerText,
-        step7: document.getElementById("step7").value,
-        step8: document.getElementById("step8").value,
-        updated_at: new Date()
-    };
-    try {
-        const { error } = await supabaseClient.from('mind_records').upsert(saveData, { onConflict: 'user_id, event_name' });
-        if (error) throw error;
-        alert("☁️ 클라우드 저장이 완료되었습니다!");
-    } catch (err) { alert("저장 실패: " + err.message); }
+/* --- 데이터 로컬 저장 로직 --- */
+function getStorageKey() { 
+    const u = document.getElementById("userSelect").value;
+    const e = document.getElementById("eventSelect").value;
+    return `mindApp_${u || "guest"}_${e || "default"}`; 
 }
 
-async function loadFromSupabase() {
-    const user = document.getElementById("userSelect").value;
-    const event = document.getElementById("eventSelect").value;
-    if(!user || !event || user === "사용자 없음" || event === "사건 없음") { alert("불러올 사용자와 사건을 선택해주세요."); return; }
-    try {
-        const { data, error } = await supabaseClient.from('mind_records').select('*').eq('user_id', user).eq('event_name', event).maybeSingle();
-        if (error) throw error;
-        if (!data) { alert("저장된 데이터가 없습니다."); return; }
-        if(confirm("클라우드 데이터를 불러올까요?")) {
-            document.getElementById("mainTitle").value = data.title || "";
-            document.getElementById("step1").value = data.step1 || "";
-            document.getElementById("step2").value = data.step2 || "";
-            document.getElementById("step3").innerText = data.step3 || "";
-            document.getElementById("step4").value = data.step4 || "";
-            document.getElementById("step5").innerText = data.step5 || "";
-            document.getElementById("step6").innerText = data.step6 || "";
-            document.getElementById("step7").value = data.step7 || "";
-            document.getElementById("step8").value = data.step8 || "";
-            saveAllToLocal();
-            updateContextDisplay(data.step1 || "");
-            alert("✅ 불러오기 성공!");
-        }
-    } catch (err) { alert("불러오기 실패: " + err.message); }
+function triggerManualSave() {
+    saveAllToLocal();
+    alert("💾 브라우저 로컬 스토리지에 모든 기록(관찰 기록 및 정화 명상 통찰 전체) 저장이 완료되었습니다!");
 }
 
 /* --- 공통 유틸리티 --- */
@@ -751,12 +705,27 @@ function toggleAdminPanel() {
 function showSection(type) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-    document.getElementById('btn-' + (type==='record'?'record':type)).classList.add('active');
+    document.getElementById('btn-' + type).classList.add('active');
     document.getElementById(type + '-section').classList.add('active');
-    document.getElementById('fixedBottomBar').style.display = (type === 'record') ? 'flex' : 'none';
-    if(type !== 'record') renderGrid(type);
+    
+    document.getElementById('fixedBottomBar').style.display = (type === 'record' || type === 'acim') ? 'flex' : 'none';
+    
+    // 정화 명상 탭 진입 시 실시간 강제 연동
+    if (type === 'acim') {
+        const evVal = document.getElementById('step1').value;
+        const jdVal = document.getElementById('step3').innerText;
+        const acimEv = document.getElementById('acim-event');
+        const acimJd = document.getElementById('acim-judgment');
+        if (acimEv && acimJd) {
+            acimEv.value = evVal;
+            acimJd.value = jdVal;
+            autoResizeTextarea(acimEv);
+            autoResizeTextarea(acimJd);
+        }
+    }
+    
+    if(type !== 'record' && type !== 'acim') renderGrid(type);
     updateContextDisplay(document.getElementById('step1').value);
-    checkScroll();
 }
 
 function updateContextDisplay(val) {
@@ -774,18 +743,15 @@ function addToRecord(type, name, btnElement) {
     const entryText = `• ${name} : ${description}`;
     
     let currentValue = target.value || target.innerText;
-
-    // 1. 정확한 중복 체크 (줄 단위 검사)
     const lines = currentValue.split('\n');
     const isDuplicate = lines.some(line => line.trim().startsWith(`• ${name} :`));
 
     if (isDuplicate) { 
         alert("이미 기록장에 추가된 항목입니다.");
-        closeModal(); // 중복일 때도 닫아줍니다.
+        closeModal();
         return; 
     }
 
-    // 2. 내용 추가
     const newValue = currentValue.trim() ? `${currentValue.trim()}\n${entryText}` : entryText;
     
     if (target.tagName === "TEXTAREA") {
@@ -797,17 +763,15 @@ function addToRecord(type, name, btnElement) {
     
     saveAllToLocal();
 
-    // 3. 버튼 피드백 및 모달 닫기
     const originalText = btnElement.innerHTML;
     btnElement.innerHTML = `✅ 추가됨`;
     
-    // 사용자가 추가된 것을 인지할 수 있게 0.3초 정도만 기다렸다가 닫습니다.
     setTimeout(() => {
         btnElement.innerHTML = originalText;
         closeModal(); 
     }, 300);
 }
-// 2. 모달 열기 및 내용 생성 함수
+
 function openModal(type, name) {
     const data = type === 'needs' ? needsData : emotionsData;
     const item = data.find(d => d.name === name);
@@ -839,50 +803,35 @@ function openModal(type, name) {
         `;
     }
 
-    // openModal 함수 하단부의 content 추가 로직
-content += `<button class="add-to-record-btn" style="margin-top:25px;" onclick="addToRecord('${type}', '${item.name}', this)">＋ 기록장에 추가</button>`;
+    content += `<button class="add-to-record-btn" style="margin-top:25px;" onclick="addToRecord('${type}', '${item.name}', this)">＋ 기록장에 추가</button>`;
 
     body.innerHTML = content;
     modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // 뒷배경 스크롤 방지
+    document.body.style.overflow = 'hidden';
 }
 
-// 모달을 닫는 독립 함수
 function closeModal(event) {
-    // 배경 클릭 시 닫기 기능을 위해 event 체크
     if (event && event.target !== event.currentTarget) return;
-    
     const modal = document.getElementById('cardModal');
     if (modal) {
         modal.style.display = 'none';
-        document.body.style.overflow = 'auto'; // 스크롤 복구
+        document.body.style.overflow = 'auto';
     }
 }
 	
 function renderGrid(type) {
     const data = type === 'needs' ? needsData : emotionsData;
-    const grid = document.getElementById(type + '-grid');
     const index = document.getElementById(type + '-index');
     
-    if(index.children.length > 0) return; // 이미 생성됨
+    if(index.children.length > 0) return;
 
     data.forEach(item => {
-        // 인덱스 링크 생성
         const link = document.createElement('div');
         link.className = `item-link link-${item.cat.split('-')[1]}`;
         link.innerText = item.name;
-        link.onclick = () => openModal(type, item.name); // 클릭 시 모달 열기
+        link.onclick = () => openModal(type, item.name);
         index.appendChild(link);
     });
-    
-    // 그리드 영역은 이제 필요 없거나 요약 카드 용도로 사용 가능합니다.
-    // 만약 그리드 전체를 없애고 싶다면 grid.style.display = 'none' 처리하세요.
-}
-/* --- 데이터 로컬 저장 로직 --- */
-function getStorageKey() { 
-    const u = document.getElementById("userSelect").value;
-    const e = document.getElementById("eventSelect").value;
-    return `mindApp_${u || "guest"}_${e || "default"}`; 
 }
 
 function addUser() { 
@@ -974,8 +923,13 @@ function syncTitleAndLoad() {
             const el = document.getElementById("step"+i);
             if(el) el.tagName === "TEXTAREA" ? el.value = "" : el.innerText = "";
         }
+        document.getElementById('acim-event').value = "";
+        document.getElementById('acim-judgment').value = "";
+        document.getElementById('acim-insight').value = "";
+        stepInsights = {};
         loadStep9Global(); return;
     }
+    
     const key = getStorageKey(); 
     document.getElementById("mainTitle").value = localStorage.getItem(key + "_title") || e || "";
     for(let i=1; i<=8; i++) {
@@ -985,6 +939,32 @@ function syncTitleAndLoad() {
         if(el.tagName === "TEXTAREA") { el.value = val; autoResizeTextarea(el); }
         else el.innerText = val;
     }
+    
+    // ACIM 탭 데이터 강제 미러링 연결 (1번 사건, 3번 생각)
+    const evVal = document.getElementById('step1').value;
+    const jdVal = document.getElementById('step3').innerText;
+    const acimEv = document.getElementById('acim-event');
+    const acimJd = document.getElementById('acim-judgment');
+    if (acimEv && acimJd) {
+        acimEv.value = evVal;
+        acimJd.value = jdVal;
+        autoResizeTextarea(acimEv);
+        autoResizeTextarea(acimJd);
+    }
+    
+    // 명상 통찰 기록 보관 패키지 역로드
+    stepInsights = {};
+    for(let i=1; i<=4; i++) {
+        stepInsights[i] = localStorage.getItem(key + "_acim_insight_" + i) || "";
+    }
+    
+    currentStepIndex = -1;
+    document.getElementById('acim-input-section').style.display = 'flex';
+    document.getElementById('acim-meditation-section').style.display = 'none';
+    document.getElementById('acim-nav-group').style.display = 'flex';
+    document.getElementById('acim-reset-btn').style.display = 'none';
+    document.getElementById('acim-insight').value = '';
+
     updateContextDisplay(document.getElementById('step1').value);
     loadStep9Global();
 }
@@ -1004,7 +984,6 @@ function saveAllToLocal() {
     const u = document.getElementById("userSelect").value;
     const e = document.getElementById("eventSelect").value;
     
-    // 글로벌 질문 저장
     localStorage.setItem("mindApp_global_step9", document.getElementById("step9").value);
     localStorage.setItem("mindApp_global_step9_extra", document.getElementById("step9_extra").value);
     
@@ -1016,6 +995,11 @@ function saveAllToLocal() {
         if(!el) continue;
         const val = el.tagName === "TEXTAREA" ? el.value : el.innerText;
         localStorage.setItem(key + "_step" + i, val);
+    }
+    
+    // 명상 통찰 기록(4단계 패키지)을 브라우저 스토리지 공통 저장소 영역에 유실 없이 보관
+    for(let i=1; i<=4; i++) {
+        localStorage.setItem(key + "_acim_insight_" + i, stepInsights[i] || "");
     }
 }
 
@@ -1088,17 +1072,10 @@ function togglestep9() {
 }
 function closePreview() { document.getElementById("previewBox").style.display = "none"; }
 
-/* --- 질문 복사 기능 분리 --- */
 function copyQ1() {
     const s1 = document.getElementById('step1').value;
     const q1 = document.getElementById('step9').value;
-
-    const combinedText = `[나의 마음 관찰 기록 - 공감 모드]
-1. 사건: ${s1}
-
-[Gemini에게 보내는 질문]
-${q1}`;
-
+    const combinedText = `[나의 마음 관찰 기록 - 공감 모드]\n1. 사건: ${s1}\n\n[Gemini에게 보내는 질문]\n${q1}`;
     navigator.clipboard.writeText(combinedText).then(() => {
         alert("사건과 질문1이 복사되었습니다!");
     }).catch(err => { alert("복사 실패"); });
@@ -1113,45 +1090,157 @@ function copyQ2() {
     const s6 = document.getElementById('step6').innerText;
     const q2 = document.getElementById('step9_extra').value;
 
-    const combinedText = `[나의 마음 관찰 기록 - 성찰 모드]
-1. 사건: ${s1}
-2. 감정: ${s2}
-3. 생각(판단): ${s3}
-4. 핵심 욕구: ${s4}
-5. 욕구 이유: ${s5}
-6. 행동 실천: ${s6}
-
-[Gemini에게 보내는 질문]
-${q2}`;
-
+    const combinedText = `[나의 마음 관찰 기록 - 성찰 모드]\n1. 사건: ${s1}\n2. 감정: ${s2}\n3. 생각(판단): ${s3}\n4. 핵심 욕구: ${s4}\n5. 욕구 이유: ${s5}\n6. 행동 실천: ${s6}\n\n[Gemini에게 보내는 질문]\n${q2}`;
     navigator.clipboard.writeText(combinedText).then(() => {
         alert("1~6번 전체 기록과 질문2가 복사되었습니다!");
     }).catch(err => { alert("복사 실패"); });
 }
 
-function checkScroll() {
-    const activeSection = document.querySelector('.content-section.active');
-    const goTopBtn = document.getElementById('goTop');
-    if (activeSection && activeSection.scrollTop > 300) goTopBtn.classList.add('show'); else goTopBtn.classList.remove('show');
+
+/* ==========================================================================
+   ACIM 마음 정화 명상 로직 영역
+   ========================================================================== */
+let currentStepIndex = -1; 
+let stepInsights = {};
+const scripts = [
+    { title: "안내: 정화 준비", text: "정화하고 싶은 사건과 판단을 적어주세요.", audio: "audio/step0.mp3" },
+    { title: "준비: 마음 가다듬기", text: "잠시 눈을 감고 깊게 숨을 들이마시고 내뱉습니다.\n이제 성령께 이 기억을 맡길 준비를 합니다.", audio: "audio/step1.mp3" },
+    { title: "1단계: 성령께 맡기기", text: `"나는 이 사건을 내가 생각하는 의미로 이해하지 않겠습니다." \n\n"나는 이 상황을 다른 관점에서 보겠습니다."`, audio: "audio/step2.mp3" },
+    { title: "2단계: 기억의 정화", text: `"내가 이 기억에 대해 느끼는 분노는 내가 보고 있는 과거에 근거한 것이며, 지금 여기에는 존재하지 않습니다."`, audio: "audio/step3.mp3" },
+    { title: "3단계: 용서와 취소", text: `"성령님, 제가 이 기억을 당신의 시각으로 보게 도와주십시오."\n\n과거의 무거운 짐을 내려놓습니다.`, audio: "audio/step4.mp3" }
+];
+
+let audioPlayer;
+let audioIcon;
+let audioBtn;
+
+function toggleAudio() {
+    if (!audioPlayer.src || audioPlayer.src === "") {
+        audioPlayer.src = scripts[0].audio;
+    }
+    if (audioPlayer.paused) {
+        const playPromise = audioPlayer.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log("Autoplay prevented:", error);
+                alert("재생 권한이 필요합니다. 화면을 터치한 후 다시 눌러주세요.");
+            });
+        }
+    } else {
+        audioPlayer.pause();
+    }
 }
 
-function scrollToActiveTop() {
-    const activeSection = document.querySelector('.content-section.active');
-    if (activeSection) activeSection.scrollTo({ top: 0, behavior: 'smooth' });
+function saveCurrentInsight() { 
+    if(currentStepIndex >= 1 && currentStepIndex <= 4) {
+        stepInsights[currentStepIndex] = document.getElementById('acim-insight').value; 
+        saveAllToLocal(); 
+    }
 }
 
+function startMeditation() {
+    const u = document.getElementById("userSelect").value;
+    const e = document.getElementById("eventSelect").value;
+    if (!u || u === "사용자 없음" || !e || e === "사건 없음") {
+        return alert("⚙️ 상단 설정 메뉴에서 '사용자'와 '사건'을 먼저 등록하거나 선택해 주세요.");
+    }
+    
+    const evVal = document.getElementById('step1').value.trim();
+    if (!evVal) return alert("마음 관찰 기록 탭의 '1. 사건 인식' 칸을 먼저 채워주셔야 정화 명상을 시작할 수 있습니다.");
+    
+    document.getElementById('acim-event').value = evVal;
+    document.getElementById('acim-judgment').value = document.getElementById('step3').innerText;
+    
+    document.getElementById('acim-input-section').style.display = 'none';
+    document.getElementById('acim-meditation-section').style.display = 'flex';
+    currentStepIndex = 1; 
+    updateAcimUI();
+}
+
+function updateAcimUI() {
+    const currentContent = scripts[currentStepIndex];
+    document.getElementById('acim-step-title').innerText = currentContent.title;
+    document.getElementById('acim-meditation-content').innerText = currentContent.text;
+    document.getElementById('acim-insight-label').innerText = `${currentContent.title.split(':')[0]} 통찰 기록`;
+    
+    document.getElementById('acim-insight').value = stepInsights[currentStepIndex] || "";
+    
+    document.getElementById('acim-prev-btn').disabled = (currentStepIndex === 1);
+    document.getElementById('acim-next-btn').innerText = (currentStepIndex === scripts.length - 1) ? "완료" : "다음 단계";
+    
+    audioPlayer.src = currentContent.audio;
+    audioPlayer.play().catch(() => { console.log("자동 재생 대기 중..."); });
+    autoResizeTextarea(document.getElementById('acim-insight'));
+}
+
+function goToNextStep() { 
+    if (currentStepIndex < scripts.length - 1) { 
+        currentStepIndex++; 
+        updateAcimUI(); 
+    } else { 
+        finishMeditation(); 
+    } 
+}
+
+function goToPrevStep() { 
+    if (currentStepIndex > 1) { 
+        currentStepIndex--; 
+        updateAcimUI(); 
+    } 
+}
+
+function finishMeditation() {
+    audioPlayer.pause();
+    document.getElementById('acim-step-title').innerText = "평온";
+    document.getElementById('acim-meditation-content').innerText = "정화 명상이 무사히 완료되었습니다.\n내면의 밝은 빛을 신뢰하세요.";
+    document.getElementById('acim-nav-group').style.display = 'none';
+    document.getElementById('acim-reset-btn').style.display = 'block';
+}
+
+function resetAcimMeditation() {
+    currentStepIndex = -1;
+    document.getElementById('acim-input-section').style.display = 'flex';
+    document.getElementById('acim-meditation-section').style.display = 'none';
+    document.getElementById('acim-nav-group').style.display = 'flex';
+    document.getElementById('acim-reset-btn').style.display = 'none';
+    
+    document.getElementById('acim-insight').value = '';
+    if (!audioPlayer.paused) audioPlayer.pause();
+}
+
+
+/* ==========================================================================
+   라이프사이클 및 이벤트 초기화 영역
+   ========================================================================== */
 window.onload = function() {
     renderUserList();
     const lastUser = localStorage.getItem("lastSelectedUser");
     renderUserList(lastUser);
     
+    audioPlayer = document.getElementById('step-audio');
+    audioIcon = document.getElementById('audio-icon');
+    audioBtn = document.getElementById('audio-toggle-sq');
+
+    audioPlayer.onplay = () => { 
+        audioIcon.innerText = "⏸ 정지"; 
+        audioBtn.classList.add('playing');
+    };
+    audioPlayer.onpause = () => { 
+        audioIcon.innerText = "▶ 가이드 음성 재생"; 
+        audioBtn.classList.remove('playing');
+    };
+
     document.querySelectorAll("textarea").forEach(ta => {
-        ta.addEventListener("input", (e) => {
-            autoResizeTextarea(e.target); 
-            saveAllToLocal();
-            if(e.target.id === 'step1') updateContextDisplay(e.target.value);
-        });
-        setTimeout(() => autoResizeTextarea(ta), 200); 
+        if(ta.id.startsWith('step') || ta.id === 'mainTitle' || ta.id.startsWith('acim-')) {
+            ta.addEventListener("input", (e) => {
+                autoResizeTextarea(e.target); 
+                if(!e.target.id.startsWith('acim-')) {
+                    saveAllToLocal();
+                }
+                if(e.target.id === 'step1') updateContextDisplay(e.target.value);
+            });
+            setTimeout(() => autoResizeTextarea(ta), 200); 
+        }
     });
 
     [3, 5, 6].forEach(i => {
@@ -1163,8 +1252,6 @@ window.onload = function() {
     document.getElementById("step8").addEventListener("input", saveAllToLocal);
     document.getElementById("step9_extra").addEventListener("input", saveAllToLocal);
     document.getElementById("mainTitle").addEventListener("input", saveAllToLocal);
-
-    document.querySelectorAll('.content-section').forEach(section => section.addEventListener('scroll', checkScroll));
     
     loadStep9Global();
 };
