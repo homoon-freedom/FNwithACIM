@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>통합 마음 가이드 & 기록장 (with ACIM)</title>
+    <title>통합 마음 가이드 & 기록장 (with ACIM & Supabase)</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <!-- Supabase JS Client 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             /* 감정,욕구 카드를 위한 카테고리 색상 */
@@ -112,9 +114,8 @@
         .back { transform: rotateY(180deg); background-color: white !important; overflow-y: auto; }
         .front { justify-content: center; align-items: center; text-align: center; }
         
-        .front .title { font-size: 1.8rem; font-weight: 900; margin-bottom: 10px; color: #222; }
-        .front .desc { font-size: 0.95rem; font-weight: 600; color: #444; }
-        .back .title { font-size: 2.1rem; font-weight: 950; margin-bottom: 15px; color: #222; padding-bottom: 10px; border-bottom: 2px solid #e0e0e0; width: 100%; text-align: center; }
+        .front .title { font-size: 1.8rem; font-weight: 900; margin-bottom: 10px; color: #222; } front .desc { font-size: 0.95rem; font-weight: 600; color: #444; }
+        .back .title { font-size: 1.8rem; font-weight: 950; margin-bottom: 12px; color: #222; padding-bottom: 8px; border-bottom: 2px solid #e0e0e0; width: 100%; text-align: center; }
 
         .section-label { font-size: 0.75rem; font-weight: 800; color: #aaa; text-transform: uppercase; margin-top: 12px; display: block; }
         .content-text, .body-status, .affirmation-box { font-size: 0.92rem; color: #444; margin-bottom: 8px; line-height: 1.6; font-weight: 800;}
@@ -204,7 +205,7 @@
         #previewImg { max-width: 100%; max-height: 70%; border-radius: 10px; object-fit: contain; }
         #closeBtn { margin-top: 15px; padding: 10px 30px; background: white; border-radius: 20px; font-weight: 600; border: none; cursor: pointer; }
 
-        /* 카테고리 색상 */
+        /* 카테고리 색상 정의 */
         .cat-meaning .front, .cat-meaning .back { border-color: var(--meaning-core); background-color: rgba(255, 204, 128, 0.8); }
         .cat-conn .front, .cat-conn .back { border-color: var(--connection-core); background-color: rgba(244, 143, 177, 0.8); }
         .cat-auto .front, .cat-auto .back { border-color: var(--autonomy-core); background-color: rgba(144, 206, 173, 0.7); }
@@ -218,27 +219,15 @@
         .link-meaning { background: var(--meaning-bg); } .link-conn { background: var(--connection-bg); color: white; } .link-auto { background: var(--autonomy-bg); } .link-well { background: var(--wellbeing-bg); } .link-peace { background: var(--peace-bg); color: white; } .link-joy { background: var(--joy-bg); } .link-love { background: var(--love-bg); color: white; } .link-sad { background: var(--sadness-bg); color: white; } .link-anx { background: var(--anxiety-bg); color: white; } .link-ang { background: var(--anger-bg); color: white; }
 
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 5000;
-            padding: 20px;
-            box-sizing: border-box;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 5000; padding: 20px; box-sizing: border-box;
         }
 
         .modal-content {
-            background: white;
-            width: 100%;
-            max-width: 450px;
-            max-height: 85vh;
-            border-radius: 25px;
-            position: relative;
-            padding: 30px;
-            overflow-y: auto;
+            background: white; width: 100%; max-width: 450px; max-height: 85vh;
+            border-radius: 25px; position: relative; padding: 30px; overflow-y: auto;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -249,21 +238,15 @@
         }
 
         .modal-close {
-            position: absolute;
-            top: 15px; right: 15px;
-            width: 35px; height: 35px;
-            background: #eee;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; cursor: pointer; font-weight: bold;
+            position: absolute; top: 15px; right: 15px; width: 35px; height: 35px;
+            background: #eee; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 20px; cursor: pointer; font-weight: bold;
         }
 
         .modal-content .title { font-size: 2rem; font-weight: 950; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px;}
         .modal-content .desc { font-size: 1rem; color: #555; margin-bottom: 20px; line-height: 1.6; text-align: center; font-weight: 800;}
 
-        /* ==========================================================================
-           ACIM 마음 정화 명상 고유 스타일 레이아웃 (전체 화면화 보완)
-           ========================================================================= */
+        /* ACIM 정화 명상 고유 스타일 레이아웃 */
         .acim-container {
             max-width: 1200px; margin: 0 auto; padding: 0 0 40px 0;
             display: flex; flex-direction: column; box-sizing: border-box; width: 100%;
@@ -271,7 +254,6 @@
         .acim-container h1 { font-size: 1.4rem; font-weight: 800; text-align: center; margin: 5px 0; color: var(--primary-blue); }
         .acim-container label { display: block; font-weight: 700; font-size: 15px; margin-bottom: 4px; color: var(--primary-blue); }
         
-        /* 기본 최소 높이를 85px로 정밀 세팅 */
         .acim-container textarea {
             width: 100%; padding: 14px; border: none; border-radius: 8px;
             background-color: var(--light-blue); font-family: inherit; font-size: 14px;
@@ -286,8 +268,6 @@
             border-top: 5px solid var(--primary-color); box-sizing: border-box;
         }
         .acim-card-desc { font-size: 13px; color: #8E8E93; margin-bottom: 10px; line-height: 1.6; }
-
-        /* 읽기 전용 폼의 시각적 안정성 처리 */
         .acim-card textarea[readonly] { background-color: #f1f5f9; color: #566a7f; cursor: not-allowed; }
 
         .acim-audio-btn-sq { 
@@ -320,7 +300,7 @@
 </head>
 <body>
 
-<!-- 기존 카드 상세 모달 -->
+<!-- 카드 상세 모달 -->
 <div id="cardModal" class="modal-overlay" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-close" onclick="closeModal()">×</div>
@@ -441,19 +421,17 @@
     </div>
 </section>
 
-<!-- 2. ACIM 정화 명상 섹션 (1번 사건 및 3번 생각 완벽 동기화형) -->
+<!-- 2. ACIM 정화 명상 섹션 -->
 <section id="acim-section" class="content-section">
     <div class="acim-container" id="acim-main-container">
         <audio id="step-audio" preload="auto"></audio>
 
-        <!-- 재생 제어 카드 부문 -->
         <div class="acim-card" style="border-top: 5px solid var(--primary-blue); text-align: center;">
             <button id="audio-toggle-sq" class="acim-audio-btn-sq" onclick="toggleAudio()">
                 <span id="audio-icon">▶ 가이드 음성 재생</span>
             </button>
         </div>
 
-        <!-- 정화 입력 폼 영역 (자동 연동 및 읽기 전용) -->
         <div id="acim-input-section" class="acim-content-wrapper">
             <div class="acim-card">
                 <label>정화하고 싶은 사건 / 기억</label>
@@ -469,7 +447,6 @@
             <button class="acim-main-btn" onclick="startMeditation()">정화 명상 시작하기</button>
         </div>
 
-        <!-- 정화 플레이어 가이드 영역 -->
         <div id="acim-meditation-section" class="acim-meditation-mode">
             <div class="acim-card" style="border-top: 5px solid var(--primary-color);">
                 <label id="acim-step-title">단계 가이드</label>
@@ -499,7 +476,7 @@
         <div id="context-display-emotions" class="context-text-display">기록장에서 사건을 먼저 입력해 보세요.</div>
     </div>
     <div class="index-container" id="emotions-index"></div>
-    <div class="grid" id="emotions-grid"></div>
+    <div class="grid" id="emotions-grid"></div> <!-- 카드 컴포넌트 복원 영역 -->
 </section>
 
 <!-- 4. 욕구 카드 섹션 -->
@@ -509,12 +486,12 @@
         <div id="context-display-needs" class="context-text-display">기록장에서 사건을 먼저 입력해 보세요.</div>
     </div>
     <div class="index-container" id="needs-index"></div>
-    <div class="grid" id="needs-grid"></div>
+    <div class="grid" id="needs-grid"></div> <!-- 카드 컴포넌트 복원 영역 -->
 </section>
 
 <!-- 통합 공통 하단 제어 바 고정 -->
 <div class="fixed-bottom-bar" id="fixedBottomBar">
-    <button class="btn-save-local" onclick="triggerManualSave()">💾 브라우저 저장</button>
+    <button class="btn-save-local" onclick="triggerManualSave()">💾 클라우드 & 브라우저 저장</button>
     <button class="btn-image" id="shareBtn" onclick="makeImage()">❤️ 이미지 공유</button>
 </div>
 
@@ -524,6 +501,13 @@
 </div>
 
 <script>
+/* ==========================================================================
+   Supabase 설정 및 자격 증명 초기화
+   ========================================================================== */
+const SUPABASE_URL = 'https://ocghxynajjbkpbyljxzg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jZ2h4eW5hampia3BieWxqeHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTg4MTksImV4cCI6MjA5MTI3NDgxOX0.weaiOCV0UMjsfSmEI_WU_0L4qJUOGRrtoWEwPKN26is';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 /* ==========================================================================
    기록장 및 카드 데이터 영역
    ========================================================================== */
@@ -630,7 +614,7 @@ const emotionsData = [
     { name: "두렵다", cat: "cat-anx", desc: "위협을 느껴 저항하고 싶은 원초적 감정", sit: "압박을 주는 상대나 공포를 마주할 때", body: "몸이 떨리고 입술이 마르며 뒤로 물러나고 싶어짐", aff: "내 안의 용기를 믿으며 나를 지킵니다." },
     { name: "무섭다", cat: "cat-anx", desc: "공포 대상 앞에서 자기 보호 기제가 작동함", sit: "천둥번개나 위험 요소를 발견할 때", body: "소름이 돋고식은땀이 흐르며 근육이 경직됨", aff: "나는 안전한 곳에 있습니다. 곧 지나갑니다." },
     { name: "초조하다", cat: "cat-anx", desc: "결과에 쫓겨 빨리 마무리되기를 갈망함", sit: "순서를 기다리거나 기한이 임박할 때", body: "다리를 떨거나 손톱을 만지작거리며 자꾸 시계를 봄", aff: "모든 것은 제때 이루어집니다. 나를 믿습니다." },
-    { name: "부끄럽다", cat: "cat-anx", desc: "실수가 드러났다고 느껴져 숨고 싶은 마음", sit: "사람들 앞에서 실수를 했을 때", body: "귀가 빨개지고 목소리가 작아지며 시선을 피하게 됨", aff: "실수는 인간미의 증거입니다. 나를 수용합니다." },
+    { name: "부끄럽다", cat: "cat-anx", desc: "실수가 드러났다고 느껴져 숨고 싶은 마음", sit: "실수들을 했을 때", body: "귀가 빨개지고 목소리가 작아지며 시선을 피하게 됨", aff: "실수는 인간미의 증거입니다. 나를 수용합니다." },
     { name: "부담스럽다", cat: "cat-anx", desc: "감당하기 어려운 기대에 의한 중압감", sit: "무리한 부탁을 받거나 책임이 무거울 때", body: "어깨와 목덜미가 묵직하고 가슴이 답답하게 압박됨", aff: "나는 내 한계를 존중하며 거절할 수 있습니다." },
     { name: "막막하다", cat: "cat-anx", desc: "길이 보이지 않아 무력한 상태", sit: "진로 등 선택지가 보이지 않을 때", body: "눈앞이 흐릿한 기분과 함께 깊은 숨이 자주 나옴", aff: "한 걸음씩 나아갑니다. 길은 만들어집니다." },
     { name: "위축되다", cat: "cat-anx", desc: "자신감이 줄어들고 마음이 오그라드는 상태", sit: "비난을 받거나 비교를 당할 때", body: "가슴을 웅크리게 되고 목소리가 기어들어 가듯 작아짐", aff: "나는 그 자체로 고유한 빛을 가진 존재입니다." },
@@ -647,7 +631,7 @@ const emotionsData = [
     { name: "어색하다", cat: "cat-ang", desc: "분위기 속에서 행동이 부자연스러운 상태", sit: "서먹한 이와 단둘이 남겨졌을 때", body: "손을 어디에 둘지 모르겠고 미소가 부자연스러움", aff: "어색함조차 과정입니다. 가벼운 미소를 지어봅니다." },
     { name: "황당하다", cat: "cat-ang", desc: "비논리적 일로 어처구니가 없는 상태", sit: "터무니없는 거짓말을 들었을 때", body: "입이 벌어지고 헛웃음이 나오며 힘이 탁 풀림", aff: "황당한 일에 소중한 감정을 쏟지 않습니다." },
     { name: "어이없다", cat: "cat-ang", desc: "일이 너무 뜻밖이거나 기가 막혀서 말문이 막히고 기가 차는 상태", sit: "상식 밖의 행동이나 도를 넘은 무례함을 목격했을 때", body: "순간적으로 머릿속이 하얘지고, 헛웃음이 나며 가슴이 답답해짐", aff: "어이없는 상황에 휘둘리기보다, 내 중심을 잡고 상황과 한 걸음 거리를 둡니다." },
-    { name: "속상하다", cat: "cat-ang", desc: "#슬픔과 화가 미묘하게 섞인 상태", sit: "가까운 이가 나의 배려를 무시할 때", body: "코끝이 찡해지고 가슴 중앙이 아릿하게 저려옴", aff: "나는 존중받을 자격이 있습니다." },
+    { name: "속상하다", cat: "cat-ang", desc: "#슬픔과 화가 미묘하게 섞인 상태", sit: "가깝고 친한 이가 나의 배려를 무시할 때", body: "코끝이 찡해지고 가슴 중앙이 아릿하게 저려옴", aff: "나는 존중받을 자격이 있습니다." },
     { name: "서운하다", cat: "cat-sad", desc: "연결이 부족해 씁쓸함이 남는 상태", sit: "특별한 날을 잊었거나 무관심할 때", body: "입꼬리가 처지고 가슴이 텅 빈 듯한 허전함이 느껴짐", aff: "서운함은 더 사랑받고 싶은 마음입니다." },
     { name: "외롭다", cat: "cat-sad", desc: "이해받지 못해 섬처럼 느껴지는 쓸쓸함", sit: "군중 속이나 혼자 남겨진 밤", body: "팔다리가 차갑게 느껴지고 몸이 작아지는 듯한 오한", aff: "나는 나 자신과 먼저 친해지겠습니다." },
     { name: "슬프다", cat: "cat-sad", desc: "상실의 아픔을 수용하고 정화하는 애도", sit: "이별이나 아픈 진실을 마주할 때", body: "눈시울이 뜨거워지고 온몸에 힘이 빠지며 가슴이 무거움", aff: "눈물은 상처 입은 마음을 씻어줍니다." },
@@ -664,22 +648,62 @@ const emotionsData = [
     { name: "괴롭다", cat: "cat-sad", desc: "고통이 극심하여 벗어나고 싶은 간절함", sit: "상처가 떠오르거나 현실이 힘들 때", body: "온몸의 근육이 뒤틀리는 듯하고 가슴이 찢어지는 통증", aff: "고통을 따뜻하게 안아주며 치유합니다." },
     { name: "그리워하다", cat: "cat-sad", desc: "부재하는 대상과 연결되고 싶은 상태", sit: "이별한 이의 유품이나 흔적을 볼 때", body: "가슴 부근이 아련하게 저리고 목소리가 떨림", aff: "그리움은 내가 사랑했다는 증거입니다." },
     { name: "실망하다", cat: "cat-sad", desc: "기대가 무너져 허탈하고 신뢰가 흔들림", sit: "믿었던 이의 무심한 모습을 보았을 때", body: "몸에서 기운이 빠져나가며 입안이 마르는 느낌", aff: "실망은 환상이 걷힌 자리에 진실을 세우는 일입니다." },
-    { name: "서럽다", cat: "cat-sad", desc: "억울함และ 슬픔이 북받쳐 오르는 아픈 마음", sit: "혼자 아프거나 오해받을 때", body: "어깨를 떨며 흐느끼게 되고 가슴이 요동침", aff: "내 마음의 울음을 충분히 들어주겠습니다." },
+    { name: "서럽다", cat: "cat-sad", desc: "억울함과 슬픔이 북받쳐 오르는 아픈 마음", sit: "혼자 아프거나 오해받을 때", body: "어깨를 떨며 흐느끼게 되고 가슴이 요동침", aff: "내 마음의 울음을 충분히 들어주겠습니다." },
     { name: "안타깝다", cat: "cat-sad", desc: "상황을 개선해주고 싶으나 뜻대로 안 됨", sit: "도움을 주고 싶지만 지켜만 봐야 할 때", body: "손바닥을 비비거나 발을 동동 구르며 가슴이 타는 듯함", aff: "나의 기도가 작은 위로가 되길 바랍니다." },
     { name: "아쉽다", cat: "cat-sad", desc: "바라던 바가 채워지지 않아 미련이 남음", sit: "조금만 더 노력했거나 기회가 있었다면 결과가 달랐을 때", body: "입술을 깨물거나 한숨을 깊게 쉬며 가슴 한구석이 허전함", aff: "다음에는 당신이 원하는 결과를 꼭 얻기를 응원합니다." },
     { name: "허탈하다", cat: "cat-sad", desc: "결과가 무너져 에너지가 빠져나간 허전함", sit: "노력이 수포로 돌아갔을 때", body: "팔다리에 힘이 하나도 없고 가슴 속이 텅 빈 구멍 같음", aff: "비워진 마음을 인정하며 새로운 에너지를 기다립니다." }
 ];
 
-/* --- 데이터 로컬 저장 로직 --- */
+/* --- 데이터 로컬 키 제어 --- */
 function getStorageKey() { 
     const u = document.getElementById("userSelect").value;
     const e = document.getElementById("eventSelect").value;
     return `mindApp_${u || "guest"}_${e || "default"}`; 
 }
 
-function triggerManualSave() {
+/* --- 데이터 백엔드 통합 저장 로직 (Supabase + LocalStorage) --- */
+async function triggerManualSave() {
+    const u = document.getElementById("userSelect").value;
+    const e = document.getElementById("eventSelect").value;
+    
     saveAllToLocal();
-    alert("💾 브라우저 로컬 스토리지에 모든 기록(관찰 기록 및 정화 명상 통찰 전체) 저장이 완료되었습니다!");
+
+    if (!u || u === "사용자 없음" || !e || e === "사건 없음") {
+        alert("💾 브라우저 임시 저장은 완료되었으나, 상단 설정에서 '사용자'와 '사건'을 활성화해야 클라우드 서버에 동기화할 수 있습니다.");
+        return;
+    }
+
+    const recordData = {
+        user_name: u,
+        event_name: e,
+        title: document.getElementById("mainTitle").value,
+        step1: document.getElementById("step1").value,
+        step2: document.getElementById("step2").value,
+        step3: document.getElementById("step3").innerText,
+        step4: document.getElementById("step4").value,
+        step5: document.getElementById("step5").innerText,
+        step6: document.getElementById("step6").innerText,
+        step7: document.getElementById("step7").value,
+        step8: document.getElementById("step8").value,
+        acim_insight_1: stepInsights[1] || "",
+        acim_insight_2: stepInsights[2] || "",
+        acim_insight_3: stepInsights[3] || "",
+        acim_insight_4: stepInsights[4] || "",
+        acim_insight_5: stepInsights[5] || "",
+        updated_at: new Date().toISOString()
+    };
+
+    try {
+        const { error } = await supabaseClient
+            .from('combine_mind_records')
+            .upsert(recordData, { onConflict: 'user_name,event_name' });
+
+        if (error) throw error;
+        alert("✨ [성공] 브라우저 및 Supabase 클라우드 서버 백업 동기화가 모두 완료되었습니다!");
+    } catch (err) {
+        console.error("Supabase Sync Failed:", err);
+        alert("💾 브라우저 로컬 저장은 안전하게 완료되었으나, 네트워크 지연으로 인해 클라우드 백업은 실패했습니다. (나중에 다시 시도해 주세요)");
+    }
 }
 
 /* --- 공통 유틸리티 --- */
@@ -712,7 +736,6 @@ function showSection(type) {
     
     document.getElementById('fixedBottomBar').style.display = (type === 'record' || type === 'acim') ? 'flex' : 'none';
     
-    // 정화 명상 탭 진입 시 실시간 강제 연동
     if (type === 'acim') {
         const evVal = document.getElementById('step1').value;
         const jdVal = document.getElementById('step3').innerText;
@@ -821,18 +844,79 @@ function closeModal(event) {
     }
 }
 	
+/* --- [완벽 복구 및 보강] 인덱스 및 카드 컴포넌트 하이브리드 생성 --- */
 function renderGrid(type) {
     const data = type === 'needs' ? needsData : emotionsData;
-    const index = document.getElementById(type + '-index');
+    const indexContainer = document.getElementById(type + '-index');
+    const gridContainer = document.getElementById(type + '-grid');
     
-    if(index.children.length > 0) return;
+    // 이미 렌더링된 자식이 있다면 중복 렌더링을 차단합니다.
+    if(indexContainer.children.length > 0) return;
+
+    const emojis = {joy:"😊", love:"❤️", peace:"🌿", anx:"😰", ang:"🔥", sad:"💧", auto:"🦋", conn:"🤝", well:"🍎", meaning:"💎"};
 
     data.forEach(item => {
+        // 1. 상단 원클릭 모달용 인덱스 뱃지 링크 생성
         const link = document.createElement('div');
         link.className = `item-link link-${item.cat.split('-')[1]}`;
         link.innerText = item.name;
         link.onclick = () => openModal(type, item.name);
-        index.appendChild(link);
+        indexContainer.appendChild(link);
+
+        // 2. 하단 인터랙티브 플립 카드 가상화 렌더링 (CSS 입체 카드 완벽 결합)
+        const card = document.createElement('div');
+        card.className = `card ${item.cat}`;
+        
+        // 카드 자체를 터치하면 앞뒤 회전 토글
+        card.onclick = () => {
+            card.classList.toggle('is-flipped');
+        };
+
+        const emoji = emojis[item.cat.split('-')[1]] || "✨";
+        
+        // 뒷면 컨텐츠 믹싱 파이프라인
+        let backContent = `
+            <div class="title">${item.name}</div>
+            <div class="desc" style="font-size:0.85rem; margin-bottom:8px; line-height:1.4;">${item.desc}</div>
+        `;
+        
+        if (type === 'needs') {
+            backContent += `
+                <span class="section-label" style="margin-top:4px;">충족 시</span>
+                <div>${item.sat.map(s => `<span class="emotion-tag tag-sat" style="font-size:0.7rem; padding:2px 6px; margin:2px;">${s}</span>`).join('')}</div>
+                <span class="section-label" style="margin-top:4px;">미충족 시</span>
+                <div>${item.unsat.map(s => `<span class="emotion-tag tag-unsat" style="font-size:0.7rem; padding:2px 6px; margin:2px;">${s}</span>`).join('')}</div>
+                <div class="action-box" style="padding:8px; font-size:0.75rem; margin-top:8px; margin-bottom:4px; line-height:1.3;">${item.action}</div>
+            `;
+        } else {
+            backContent += `
+                <span class="section-label" style="margin-top:4px;">상황</span><div class="content-text" style="font-size:0.8rem; margin-bottom:2px;">${item.sit}</div>
+                <span class="section-label" style="margin-top:4px;">몸의 상태</span><div class="body-status" style="font-size:0.8rem; margin-bottom:2px;">${item.body}</div>
+                <div class="affirmation-box" style="background:#f9f9f9; padding:6px; border-radius:6px; font-style:italic; font-size:0.75rem; margin-top:6px; margin-bottom:4px; line-height:1.3;">"${item.aff}"</div>
+            `;
+        }
+        
+        // 버튼 클릭 이벤트는 카드 회전 버블링 방지를 위해 stopPropagation 필수 적용
+        backContent += `
+            <button class="add-to-record-btn" style="padding:8px; font-size:0.8rem; margin-top:auto;" onclick="event.stopPropagation(); addToRecord('${type}', '${item.name}', this)">
+                ＋ 기록장에 추가
+            </button>
+        `;
+
+        card.innerHTML = `
+            <div class="card-inner">
+                <div class="front">
+                    <div style="font-size:50px; margin-bottom:8px;">${emoji}</div>
+                    <div class="title">${item.name}</div>
+                    <div class="desc" style="font-size:0.85rem; color:#666; font-weight:500;">터치해서 정보 보기</div>
+                </div>
+                <div class="back" onclick="event.stopPropagation();">
+                    ${backContent}
+                </div>
+            </div>
+        `;
+        
+        gridContainer.appendChild(card);
     });
 }
 
@@ -914,16 +998,19 @@ function renderEventList(sE) {
     syncTitleAndLoad(); 
 }
 
-function syncTitleAndLoad() { 
+/* --- 데이터 로드 로직 (로컬 선로드 후 Supabase 클라우드 실시간 대조) --- */
+async function syncTitleAndLoad() { 
     const u = document.getElementById("userSelect").value;
     const e = document.getElementById("eventSelect").value;
     if(u && u !== "사용자 없음") localStorage.setItem("lastSelectedUser", u);
     if(e && e !== "사건 없음") localStorage.setItem(`lastSelectedEvent_${u}`, e);
+    
     if (!u || u === "사용자 없음" || !e || e === "사건 없음") {
         document.getElementById("mainTitle").value = "";
         for(let i=1; i<=8; i++) {
             const el = document.getElementById("step"+i);
-            if(el) el.tagName === "TEXTAREA" ? el.value = "" : el.innerText = "";
+            // 추천사항 보완 반영: 플레이스홀더 복원 안정성을 위해 innerHTML을 완전히 리셋
+            if(el) el.tagName === "TEXTAREA" ? el.value = "" : el.innerHTML = "";
         }
         document.getElementById('acim-event').value = "";
         document.getElementById('acim-judgment').value = "";
@@ -932,6 +1019,7 @@ function syncTitleAndLoad() {
         loadStep9Global(); return;
     }
     
+    // 1단계: 로컬 선행 로드
     const key = getStorageKey(); 
     document.getElementById("mainTitle").value = localStorage.getItem(key + "_title") || e || "";
     for(let i=1; i<=8; i++) {
@@ -942,7 +1030,50 @@ function syncTitleAndLoad() {
         else el.innerText = val;
     }
     
-    // ACIM 탭 데이터 강제 미러링 연결
+    stepInsights = {};
+    for(let i=1; i<=5; i++) {
+        stepInsights[i] = localStorage.getItem(key + "_acim_insight_" + i) || "";
+    }
+
+    // 2단계: Supabase 서버 오버레이 대조
+    try {
+        const { data, error } = await supabaseClient
+            .from('combine_mind_records')
+            .select('*')
+            .eq('user_name', u)
+            .eq('event_name', e)
+            .maybeSingle();
+
+        if (!error && data) {
+            document.getElementById("mainTitle").value = data.title || "";
+            document.getElementById("step1").value = data.step1 || "";
+            document.getElementById("step2").value = data.step2 || "";
+            document.getElementById("step3").innerText = data.step3 || "";
+            document.getElementById("step4").value = data.step4 || "";
+            document.getElementById("step5").innerText = data.step5 || "";
+            document.getElementById("step6").innerText = data.step6 || "";
+            document.getElementById("step7").value = data.step7 || "";
+            document.getElementById("step8").value = data.step8 || "";
+            
+            stepInsights[1] = data.acim_insight_1 || "";
+            stepInsights[2] = data.acim_insight_2 || "";
+            stepInsights[3] = data.acim_insight_3 || "";
+            stepInsights[4] = data.acim_insight_4 || "";
+            stepInsights[5] = data.acim_insight_5 || "";
+            
+            localStorage.setItem(key + "_title", data.title || "");
+            for(let i=1; i<=8; i++) {
+                localStorage.setItem(key + "_step" + i, i === 3 || i === 5 || i === 6 ? data["step" + i] : data["step" + i]);
+            }
+            for(let i=1; i<=5; i++) {
+                localStorage.setItem(key + "_acim_insight_" + i, stepInsights[i]);
+            }
+        }
+    } catch (err) {
+        console.log("Supabase Fetch Bypass:", err);
+    }
+    
+    // ACIM 연동 동기화
     const evVal = document.getElementById('step1').value;
     const jdVal = document.getElementById('step3').innerText;
     const acimEv = document.getElementById('acim-event');
@@ -954,12 +1085,6 @@ function syncTitleAndLoad() {
         autoResizeTextarea(acimJd);
     }
     
-    // [중요] 명상 통찰 보관 패키지 역로드 범위를 5번까지 확장 (4단계 통찰 분리 지원)
-    stepInsights = {};
-    for(let i=1; i<=5; i++) {
-        stepInsights[i] = localStorage.getItem(key + "_acim_insight_" + i) || "";
-    }
-    
     currentStepIndex = -1;
     document.getElementById('acim-input-section').style.display = 'flex';
     document.getElementById('acim-meditation-section').style.display = 'none';
@@ -969,6 +1094,8 @@ function syncTitleAndLoad() {
 
     updateContextDisplay(document.getElementById('step1').value);
     loadStep9Global();
+    
+    document.querySelectorAll("textarea").forEach(autoResizeTextarea);
 }
 
 function loadStep9Global() {
@@ -999,7 +1126,6 @@ function saveAllToLocal() {
         localStorage.setItem(key + "_step" + i, val);
     }
     
-    // [중요] 4단계 독립 통찰 저장을 위해 반복 한도를 i<=5로 안전하게 확장 
     for(let i=1; i<=5; i++) {
         localStorage.setItem(key + "_acim_insight_" + i, stepInsights[i] || "");
     }
@@ -1019,11 +1145,14 @@ async function makeImage() {
                 clonedDoc.querySelectorAll('.record-card-desc').forEach(el => el.style.display = 'none');
                 const clonedCapture = clonedDoc.getElementById('capture');
                 clonedCapture.style.width = '1800px'; clonedCapture.style.padding = '0px'; 
+                clonedCapture.style.letterSpacing = '0px'; // 폰트 자간 잘림 방지 규칙 고정
+                
                 const title = clonedDoc.getElementById('mainTitle');
                 const titleDiv = clonedDoc.createElement('div');
                 titleDiv.innerText = title.value || "나의 마음 탐구 기록";
-                titleDiv.style.cssText = "font-size:75px; font-weight:900; color:#003366; text-align:center; margin-bottom:60px; padding:30px; border-bottom:8px solid #003366;";
+                titleDiv.style.cssText = "font-size:75px; font-weight:900; color:#003366; text-align:center; margin-bottom:60px; padding:30px; border-bottom:8px solid #003366; line-height:1.3;";
                 title.replaceWith(titleDiv);
+                
                 clonedDoc.querySelectorAll('textarea, .editable-list').forEach(ta => {
                     const originalTextContent = (ta.tagName === "TEXTAREA" ? ta.value : ta.innerText).trim();
                     const d = clonedDoc.createElement('div');
@@ -1105,7 +1234,6 @@ function copyQ2() {
 let currentStepIndex = -1; 
 let stepInsights = {};
 
-// [업데이트] 4단계 스크립트를 공식 추가 탑재했습니다.
 const scripts = [
     { title: "안내: 정화 준비", text: "정화하고 싶은 사건과 판단을 적어주세요.", audio: "audio/step0.mp3" },
     { title: "준비: 마음 가다듬기", text: "잠시 눈을 감고 깊게 숨을 들이마시고 내뱉습니다.\n이제 성령께 이 기억을 맡길 준비를 합니다.", audio: "audio/step1.mp3" },
@@ -1137,7 +1265,6 @@ function toggleAudio() {
 }
 
 function saveCurrentInsight() { 
-    // 저장 범위 상한선을 5까지 늘려 4단계 내용이 스토리지 유실 없이 기록되도록 수정
     if(currentStepIndex >= 1 && currentStepIndex <= 5) {
         stepInsights[currentStepIndex] = document.getElementById('acim-insight').value; 
         saveAllToLocal(); 
@@ -1169,7 +1296,6 @@ function updateAcimUI() {
     document.getElementById('acim-meditation-content').innerText = currentContent.text;
     document.getElementById('acim-insight-label').innerText = `${currentContent.title.split(':')[0]} 통찰 기록`;
     
-    // 분리 매칭 기법을 적용하여 4단계 배열 고유 슬롯 데이터를 렌더링
     document.getElementById('acim-insight').value = stepInsights[currentStepIndex] || "";
     
     document.getElementById('acim-prev-btn').disabled = (currentStepIndex === 1);
@@ -1198,6 +1324,7 @@ function goToPrevStep() {
 
 function finishMeditation() {
     audioPlayer.pause();
+    audioPlayer.currentTime = 0; // 오디오 리와인드 초기화 적용
     document.getElementById('acim-step-title').innerText = "평온";
     document.getElementById('acim-meditation-content').innerText = "정화 명상이 무사히 완료되었습니다.\n내면의 밝은 빛을 신뢰하세요.";
     document.getElementById('acim-nav-group').style.display = 'none';
@@ -1213,16 +1340,36 @@ function resetAcimMeditation() {
     
     document.getElementById('acim-insight').value = '';
     if (!audioPlayer.paused) audioPlayer.pause();
+    audioPlayer.currentTime = 0; // 오디오 정지 시 재생 바 복원 규칙 완비
 }
 
 
 /* ==========================================================================
    라이프사이클 및 이벤트 초기화 영역
    ========================================================================= */
-window.onload = function() {
+window.onload = async function() {
     renderUserList();
     const lastUser = localStorage.getItem("lastSelectedUser");
     renderUserList(lastUser);
+    
+    try {
+        const { data, error } = await supabaseClient
+            .from('combine_mind_records')
+            .select('user_name');
+            
+        if (!error && data) {
+            let localUsers = JSON.parse(localStorage.getItem("mindUsers") || "[]");
+            data.forEach(row => {
+                if(row.user_name && !localUsers.includes(row.user_name)) {
+                    localUsers.push(row.user_name);
+                }
+            });
+            localStorage.setItem("mindUsers", JSON.stringify(localUsers));
+            renderUserList(lastUser || localUsers[0]);
+        }
+    } catch (e) {
+        console.log("Supabase Connection initial bypass:", e);
+    }
     
     audioPlayer = document.getElementById('step-audio');
     audioIcon = document.getElementById('audio-icon');
