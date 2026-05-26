@@ -5,302 +5,103 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Combined with ACIM (통합 마음 가이드 & 기록장)</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <!-- Supabase JS Client 라이브러리 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            /* 감정,욕구 카드를 위한 카테고리 색상 */
-            --meaning-core: #ffcc80; --connection-core: #f48fb1; --autonomy-core: #90cead;
-            --wellbeing-core: #81d4fa; --peace-core: #b39ddb;
-            --joy-core: #fff176; --love-core: #f06292; --sadness-core: #64b5f6;
-            --anxiety-core: #ba68c8; --anger-core: #ef5350;
-            --meaning-bg: rgba(255, 204, 128, 0.7); 
-			--connection-bg: rgba(244, 143, 177, 0.8); 
-			--autonomy-bg: rgba(144, 206, 173, 0.7);
-            --wellbeing-bg: rgba(129, 212, 250, 0.7); 
-			--peace-bg: rgba(179, 157, 219, 0.8);
-            --joy-bg: rgba(255, 241, 118, 0.7); 
-			--love-bg: rgba(240, 98, 146, 0.8); 
-			--sadness-bg: rgba(100, 181, 246, 0.8);
-            --anxiety-bg: rgba(186, 104, 200, 0.8); 
-			--anger-bg: rgba(239, 83, 80, 0.8);
+            /* 카테고리 테마 색상 정의 (Core / BG 단일화 및 단순화) */
+            --joy-c: #fff176; --love-c: #f06292; --peace-c: #b39ddb; --anx-c: #ba68c8; --ang-c: #ef5350; --sad-c: #64b5f6; --auto-c: #90cead; --conn-c: #f48fb1; --well-c: #81d4fa; --meaning-c: #ffcc80;
+            --joy-bg: rgba(255,241,118,.7); --love-bg: rgba(240,98,146,.8); --peace-bg: rgba(179,157,219,.8); --anx-bg: rgba(186,104,200,.8); --ang-bg: rgba(239,83,80,.8); --sad-bg: rgba(100,181,246,.8); --auto-bg: rgba(144,206,173,.7); --conn-bg: rgba(244,143,177,.8); --well-bg: rgba(129,212,250,.7); --meaning-bg: rgba(255,204,128,.7);
             
-            /* 기록장 색상 */
-            --primary-blue: #003366; 
-			--accent-blue: #007AFF; 
-			--light-blue: #EBF4FF;
-            --danger-red: #FF3B30; 
-			--bg-gray: #F2F5F8;
-            --text: #333; 
-			--bg: #f8f9fa;
-
-            /* ACIM 명상 색상 고유 정의 */
-            --primary-color: #5856d6;
-            --success-color: #34c759;
-            --info-color: #007aff;
-            --text-color: #1c1c1e;
-            --secondary-text: #8e8e93;
+            --primary-blue: #003366; --accent-blue: #007AFF; --light-blue: #EBF4FF; --danger-red: #FF3B30; --bg-gray: #F2F5F8; --text: #333;
+            --primary-color: #5856d6; --success-color: #34c759; --text-color: #1c1c1e;
         }
-        
-        html, body { 
-            height: 100%; margin: 0; padding: 0; overflow: hidden; 
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-            background: var(--bg-gray); color: var(--text); 
-            line-height: 1.5; word-break: keep-all;
-        }
-
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Pretendard', system-ui, sans-serif; background: var(--bg-gray); color: var(--text); line-height: 1.5; word-break: keep-all; }
         body { display: flex; flex-direction: column; }
-
-        /* 네비게이션 고정 */
-        .nav-container {
-            flex-shrink: 0; background: white; border-bottom: 2px solid #eee;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 2000;
-        }
+        .nav-container { flex-shrink: 0; background: white; border-bottom: 2px solid #eee; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 2000; }
         .tab-menu { display: flex; justify-content: center; max-width: 1200px; margin: 0 auto; }
-        .tab-btn {
-            flex: 1; padding: 15px 5px; font-size: 0.95rem; font-weight: 800; color: #999;
-            cursor: pointer; border: none; background: none; transition: 0.3s;
-            position: relative; text-align: center;
-        }
+        .tab-btn { flex: 1; padding: 15px 5px; font-size: 0.95rem; font-weight: 800; color: #999; cursor: pointer; border: none; background: none; position: relative; text-align: center; transition: 0.3s; }
         .tab-btn.active { color: var(--accent-blue); }
-        .tab-btn.active::after {
-            content: ''; position: absolute; bottom: -2px; left: 0; width: 100%;
-            height: 4px; background: var(--accent-blue);
-        }
-
-        /* 메인 콘텐츠 영역 */
-        .content-section { 
-            display: none; flex: 1; overflow-y: auto; 
-            -webkit-overflow-scrolling: touch; padding-bottom: 120px; 
-        }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 4px; background: var(--accent-blue); }
+        .content-section { display: none; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 120px; }
         .content-section.active { display: block; }
-
-        header { padding: 25px 20px 10px; text-align: center; background: white; }
-        h1 { margin: 0; font-size: 1.5rem; font-weight: 800; color: var(--primary-blue); }
-        .subtitle { color: #666; font-size: 0.85rem; margin-top: 5px; }
-
-        .context-guide {
-            position: sticky; top: 0; z-index: 1000;
-            max-width: 1200px; margin: 0 auto; padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.96);
-            border-left: 2px solid var(--accent-blue);
-            border-bottom: 1px solid #eee;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            backdrop-filter: blur(8px);
-            box-sizing: border-box;
-        }
-        .context-label { font-weight: 800; color: var(--accent-blue); display: block; font-size: 0.75rem; margin-bottom: 6px; align-self: flex-start;}
-        .context-text-display { 
-            font-weight: 600; color: #333; font-size: 0.9rem; line-height: 1.5;
-            white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word;
-            max-height: 80px; overflow-y: auto; 
-        }
-
-        .index-container { 
-            max-width: 1200px; margin: 15px auto; padding: 0 15px; 
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; 
-        }
-        .item-link { 
-            height: 42px; display: flex; align-items: center; justify-content: center; 
-            border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: 700; 
-            border: 1px solid rgba(0,0,0,0.03); text-align: center; transition: 0.2s; padding: 0 4px;
-        }
-
-        .grid { display: grid; grid-template-columns: 1fr; max-width: 440px; margin: 15px auto; padding: 0 15px; gap: 20px; }
-        .card { perspective: 2000px; height: 400px; cursor: pointer; position: relative; scroll-margin-bottom: 50px; } 
-        .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
-        .card.is-flipped .card-inner { transform: rotateY(180deg); }
-        .front, .back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; padding: 24px; border-radius: 20px; box-sizing: border-box; border: 2px solid transparent; }
-        .back { transform: rotateY(180deg); background-color: white !important; overflow-y: auto; }
-        .front { justify-content: center; align-items: center; text-align: center; }
+        .context-guide { position: sticky; top: 0; z-index: 1000; max-width: 1200px; margin: 0 auto; padding: 12px 15px; background: rgba(255, 255, 255, 0.96); border-left: 2px solid var(--accent-blue); border-bottom: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.08); backdrop-filter: blur(8px); box-sizing: border-box; }
+        .context-label { font-weight: 800; color: var(--accent-blue); display: block; font-size: 0.75rem; margin-bottom: 6px; }
+        .context-text-display { font-weight: 600; color: #333; font-size: 0.9rem; white-space: pre-wrap; word-break: break-all; max-height: 80px; overflow-y: auto; }
+        .index-container { max-width: 1200px; margin: 15px auto; padding: 0 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .item-link { height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: 700; border: 1px solid rgba(0,0,0,0.03); text-align: center; padding: 0 4px; }
         
-        .front .title { font-size: 1.8rem; font-weight: 900; margin-bottom: 10px; color: #222; } front .desc { font-size: 0.95rem; font-weight: 600; color: #444; }
-        .back .title { font-size: 1.8rem; font-weight: 950; margin-bottom: 12px; color: #222; padding-bottom: 8px; border-bottom: 2px solid #e0e0e0; width: 100%; text-align: center; }
-
-        .section-label { font-size: 0.75rem; font-weight: 800; color: #aaa; text-transform: uppercase; margin-top: 12px; display: block; }
-        .content-text, .body-status, .affirmation-box { font-size: 0.92rem; color: #444; margin-bottom: 8px; line-height: 1.6; font-weight: 800;}
-        .emotion-tag { padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; margin: 4px; display: inline-block; cursor: pointer; }
-        .tag-sat { background: #e8f5e9; color: #4caf50; }
-        .tag-unsat { background: #ffebee; color: #f44336; }
+        .emotion-tag { padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; margin: 4px; display: inline-block; }
+        .tag-sat { background: #e8f5e9; color: #4caf50; } .tag-unsat { background: #ffebee; color: #f44336; }
         .action-box { margin-top: auto; padding: 12px; border-radius: 10px; font-size: 0.85rem; background: #f0f7ff; border: 1px dashed var(--accent-blue); color: #0056b3; font-weight: 600; margin-bottom: 10px; }
-
-        .add-to-record-btn {
-            padding: 12px; width: 100%; background: var(--accent-blue); color: white;
-            border: none; border-radius: 12px; font-weight: 800; font-size: 0.9rem;
-            cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px;
-            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2); margin-top: 10px;
-        }
-
-        /* 기록장 스타일 */
-        .admin-section { background: white; margin: 15px 15px 15px; padding: 0; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); overflow: hidden; }
-        .admin-toggle-btn {
-            width: 100%; padding: 12px; background: #f8f9fa; border: none; border-bottom: 1px solid #eee;
-            font-size: 13px; font-weight: 800; color: var(--primary-blue); cursor: pointer;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-		.admin-content { 
-  		  padding: 15px 15px 10px 15px; 
-		    display: none; 
-		}
+        .add-to-record-btn { padding: 12px; width: 100%; background: var(--accent-blue); color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2); margin-top: 10px; }
+        .admin-section { background: white; margin: 15px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); overflow: hidden; }
+        .admin-toggle-btn { width: 100%; padding: 12px; background: #f8f9fa; border: none; border-bottom: 1px solid #eee; font-size: 13px; font-weight: 800; color: var(--primary-blue); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+		.admin-content { padding: 15px 15px 10px 15px; display: none; }
         .admin-content.show { display: block; }
         .manage-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px dashed #888; }
         .input-group { display: flex; gap: 5px; }
         input[type="text"], select { flex: 1; padding: 10px; border: 1.5px solid #DDE4EE; border-radius: 8px; font-size: 14px; outline: none; }
         .btn { padding: 8px 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 12px; }
-        .btn-add { background: var(--accent-blue); color: white; }
-        .btn-del { background: var(--danger-red); color: white; }
-        
+        .btn-add { background: var(--accent-blue); color: white; } .btn-del { background: var(--danger-red); color: white; }
         #mainTitle { width: calc(100% - 30px); margin: 10px 15px; padding: 12px; font-size: 18px; font-weight: 800; text-align: center; border: 2px solid var(--accent-blue); border-radius: 10px; color: var(--primary-blue); background: white; box-sizing: border-box; }
-        
         .record-card { background: white; border-radius: 10px; padding: 18px; margin: 0 15px 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border-top: 5px solid var(--accent-blue); box-sizing: border-box; }
         .record-card-title { font-size: 15px; font-weight: 700; color: var(--primary-blue); margin-bottom: 4px; }
         .record-card-desc { font-size: 13px; color: #8E8E93; margin-bottom: 10px; line-height: 1.6; }
-        
-        /* 공통 텍스트 입력 스타일 */
-        textarea, .editable-list { 
-            width: 100%; box-sizing: border-box; 
-            min-height: 130px; 
-            height: auto;     
-            border: none; outline: none; resize: none; 
-            font-size: 14px; background: var(--light-blue); padding: 12px; border-radius: 5px; 
-            line-height: 1.6; color: #2c3e50; font-family: 'Pretendard', sans-serif; 
-            white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word;
-            overflow: hidden; 
-        }
+        textarea, .editable-list { width: 100%; box-sizing: border-box; min-height: 130px; height: auto; border: none; outline: none; resize: none; font-size: 14px; background: var(--light-blue); padding: 12px; border-radius: 5px; line-height: 1.6; color: #2c3e50; font-family: inherit; white-space: pre-wrap; word-break: break-all; overflow: hidden; }
         textarea::placeholder { color: #9bbad3; font-size: 13px; }
-        
-        .editable-list:empty::before {
-            content: attr(data-placeholder);
-            color: #9bbad3;
-            font-size: 13px;
-            pointer-events: none;
-            white-space: pre-wrap;
-	    }
-
-        .copy-btn {
-            margin-top: 10px; padding: 12px; width: 100%; background: #333; color: white;
-            border: none; border-radius: 10px; font-weight: 800; font-size: 0.85rem;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: 0.2s;
-        }
-        .copy-btn:active { transform: scale(0.98); background: #000; }
-        .btn-q1 { background: #007AFF; }
-        .btn-q2 { background: #5856D6; }
-
-        .fixed-bottom-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            display: flex; gap: 10px; padding: 15px 15px calc(30px + env(safe-area-inset-bottom));
-            background: rgba(242, 245, 248, 0.95);
-            backdrop-filter: blur(10px); border-top: 1px solid #eee;
-            box-sizing: border-box; z-index: 2500; align-items: center;
-        }
-        .fixed-bottom-bar button { 
-            border-radius: 10px; border: none; font-weight: 700; cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s;
-        }
-        .btn-save-local { background: #3ecf8e; color: white; flex: 1.0; padding: 12px; font-size: 15px; }
-        .btn-image { background: var(--primary-blue); color: white; flex: 1.0; padding: 12px; font-size: 15px; }
-        
+        .editable-list:empty::before { content: attr(data-placeholder); color: #9bbad3; font-size: 13px; pointer-events: none; }
+        .copy-btn { margin-top: 10px; padding: 12px; width: 100%; color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .btn-q1 { background: #007AFF; } .btn-q2 { background: #5856D6; }
+        .fixed-bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; gap: 10px; padding: 15px 15px calc(30px + env(safe-area-inset-bottom)); background: rgba(242, 245, 248, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #eee; box-sizing: border-box; z-index: 2500; }
+        .fixed-bottom-bar button { border-radius: 10px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex: 1; padding: 12px; font-size: 15px; }
+        .btn-save-local { background: #3ecf8e; color: white; } .btn-image { background: var(--primary-blue); color: white; }
         #previewBox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; flex-direction: column; z-index: 4000; padding: 20px; }
         #previewImg { max-width: 100%; max-height: 70%; border-radius: 10px; object-fit: contain; }
         #closeBtn { margin-top: 15px; padding: 10px 30px; background: white; border-radius: 20px; font-weight: 600; border: none; cursor: pointer; }
 
-        /* 카테고리 색상 정의 */
-        .cat-meaning .front, .cat-meaning .back { border-color: var(--meaning-core); background-color: rgba(255, 204, 128, 0.8); }
-        .cat-conn .front, .cat-conn .back { border-color: var(--connection-core); background-color: rgba(244, 143, 177, 0.8); }
-        .cat-auto .front, .cat-auto .back { border-color: var(--autonomy-core); background-color: rgba(144, 206, 173, 0.7); }
-        .cat-well .front, .cat-well .back { border-color: var(--wellbeing-core); background-color: rgba(129, 212, 250, 0.8); }
-        .cat-peace .front, .cat-peace .back { border-color: var(--peace-core); background-color: rgba(179, 157, 219, 0.8); }
-        .cat-joy .front, .cat-joy .back { border-color: var(--joy-core); background-color: rgba(255, 241, 118, 0.7); }
-        .cat-love .front, .cat-love .back { border-color: var(--love-core); background-color: rgba(240, 98, 146, 0.8); }
-        .cat-sad .front, .cat-sad .back { border-color: var(--sadness-core); background-color: rgba(100, 181, 246, 0.8); }
-        .cat-anx .front, .cat-anx .back { border-color: var(--anxiety-core); background-color: rgba(186, 104, 200, 0.8); }
-        .cat-ang .front, .cat-ang .back { border-color: var(--anger-core); background-color: rgba(239, 83, 80, 0.8); }
-        .link-meaning { background: var(--meaning-bg); } .link-conn { background: var(--connection-bg); color: white; } .link-auto { background: var(--autonomy-bg); } .link-well { background: var(--wellbeing-bg); } .link-peace { background: var(--peace-bg); color: white; } .link-joy { background: var(--joy-bg); } .link-love { background: var(--love-bg); color: white; } .link-sad { background: var(--sadness-bg); color: white; } .link-anx { background: var(--anxiety-bg); color: white; } .link-ang { background: var(--anger-bg); color: white; }
+        /* 동적 카테고리 스타일 맵핑 단일화 */
+        .link-joy { background: var(--joy-bg); }
+        .link-love { background: var(--love-bg); color: white; }
+        .link-peace { background: var(--peace-bg); color: white; }
+        .link-anx { background: var(--anx-bg); color: white; }
+        .link-ang { background: var(--ang-bg); color: white; }
+        .link-sad { background: var(--sad-bg); color: white; }
+        .link-auto { background: var(--auto-bg); }
+        .link-conn { background: var(--conn-bg); color: white; }
+        .link-well { background: var(--well-bg); }
+        .link-meaning { background: var(--meaning-bg); }
 
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
-            display: none; justify-content: center; align-items: center;
-            z-index: 5000; padding: 20px; box-sizing: border-box;
-        }
-
-        .modal-content {
-            background: white; width: 100%; max-width: 450px; max-height: 85vh;
-            border-radius: 25px; position: relative; padding: 30px; overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes modalPop {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .modal-close {
-            position: absolute; top: 15px; right: 15px; width: 35px; height: 35px;
-            background: #eee; border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; font-size: 20px; cursor: pointer; font-weight: bold;
-        }
-
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 5000; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: white; width: 100%; max-width: 450px; max-height: 85vh; border-radius: 25px; position: relative; padding: 30px; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3); animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes modalPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-close { position: absolute; top: 15px; right: 15px; width: 35px; height: 35px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; font-weight: bold; }
         .modal-content .title { font-size: 2rem; font-weight: 950; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px;}
         .modal-content .desc { font-size: 1rem; color: #555; margin-bottom: 20px; line-height: 1.6; text-align: center; font-weight: 800;}
-
-        /* ACIM 정화 명상 고유 스타일 레이아웃 */
-        .acim-container {
-            max-width: 1200px; margin: 0 auto; padding: 0 0 40px 0;
-            display: flex; flex-direction: column; box-sizing: border-box; width: 100%;
-        }
-        .acim-container h1 { font-size: 1.4rem; font-weight: 800; text-align: center; margin: 5px 0; color: var(--primary-blue); }
+        
+        .acim-container { max-width: 1200px; margin: 0 auto; padding-bottom: 40px; display: flex; flex-direction: column; width: 100%; }
         .acim-container label { display: block; font-weight: 700; font-size: 15px; margin-bottom: 4px; color: var(--primary-blue); }
-        
-        .acim-container textarea {
-            width: 100%; padding: 14px; border: none; border-radius: 8px;
-            background-color: var(--light-blue); font-family: inherit; font-size: 14px;
-            line-height: 1.6; box-sizing: border-box; resize: none; margin-bottom: 0;
-            height: auto; min-height: 85px; overflow-y: hidden; color: #2c3e50;
-        }
-        .acim-container textarea::placeholder { color: #9bbad3; font-size: 13px; }
-        
-        .acim-card {
-            background: white; border-radius: 10px; padding: 18px; 
-            margin: 15px 15px 0 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
-            border-top: 5px solid var(--primary-color); box-sizing: border-box;
-        }
+        .acim-card { background: white; border-radius: 10px; padding: 18px; margin: 15px 15px 0 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border-top: 5px solid var(--primary-color); box-sizing: border-box; }
         .acim-card-desc { font-size: 13px; color: #8E8E93; margin-bottom: 10px; line-height: 1.6; }
-        .acim-card textarea[readonly] { background-color: #f1f5f9; color: #566a7f; cursor: not-allowed; }
-
-        .acim-audio-btn-sq { 
-            background-color: #f2f2f7; color: var(--text-color); border: 1.5px solid #DDE4EE;
-            padding: 10px 24px; font-size: 13px; font-weight: 800; border-radius: 20px; cursor: pointer;
-            transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; margin-top: 5px;
-        }
+        .acim-audio-btn-sq { background-color: #f2f2f7; color: var(--text-color); border: 1.5px solid #DDE4EE; padding: 10px 24px; font-size: 13px; font-weight: 800; border-radius: 20px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; margin-top: 5px; }
         .acim-audio-btn-sq.playing { background-color: #ff9500; color: white; border-color: #ff9500; }
-
         .acim-content-wrapper { flex: 1; display: flex; flex-direction: column; margin-top: 15px; }
-        
-        button.acim-main-btn {
-            width: calc(100% - 30px); margin: 15px 15px 15px; padding: 14px; 
-            background-color: var(--primary-color); color: white; border: none; 
-            border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; 
-            box-shadow: 0 4px 10px rgba(88, 86, 214, 0.2); transition: 0.2s;
-        }
-        button.acim-main-btn:active { transform: scale(0.99); }
-
+        button.acim-main-btn { width: calc(100% - 30px); margin: 15px; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 10px rgba(88, 86, 214, 0.2); }
         .acim-meditation-mode { display: none; flex-direction: column; margin-top: 15px; }
-        .acim-current-step-text { 
-            font-size: 1.05rem; line-height: 1.7; text-align: center; 
-            min-height: 100px; display: flex; align-items: center; justify-content: center; 
-            white-space: pre-line; font-weight: 800; color: #2c3e50; padding: 10px 0;
-        }
-        .acim-button-group { display: flex; gap: 8px; margin: 15px 15px 15px; }
-        .acim-nav-button { flex: 1; padding: 14px 4px; background-color: white; color: var(--text-color); font-size: 14px; font-weight: 800; border-radius: 10px; border: 1.5px solid #DDE4EE; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .acim-current-step-text { font-size: 1.05rem; line-height: 1.7; text-align: center; min-height: 100px; display: flex; align-items: center; justify-content: center; white-space: pre-line; font-weight: 800; color: #2c3e50; padding: 10px 0; }
+        .acim-button-group { display: flex; gap: 8px; margin: 15px; }
+        .acim-nav-button { flex: 1; padding: 14px 4px; background-color: white; color: var(--text-color); font-size: 14px; font-weight: 800; border-radius: 10px; border: 1.5px solid #DDE4EE; cursor: pointer; }
         .acim-nav-button.primary { background-color: var(--primary-color); color: white; border: none; box-shadow: 0 4px 10px rgba(88, 86, 214, 0.2); }
+
+        /* [추가] 감정 카드 모달 팝업 내부의 상황, 몸의 상태, 확언 본문 글씨를 굵게 처리 */
+        .modal-content .content-text,
+        .modal-content .body-status,
+        .modal-content .affirmation-box {
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
 
-<!-- 카드 상세 모달 -->
 <div id="cardModal" class="modal-overlay" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-close" onclick="closeModal()">×</div>
@@ -317,7 +118,6 @@
     </div>
 </nav>
 
-<!-- 1. 마음 관찰 기록 섹션 -->
 <section id="record-section" class="content-section active">
     <div id="capture">
         <div class="admin-section" id="adminPanel">
@@ -327,7 +127,7 @@
             </button>
             <div class="admin-content" id="adminContent">
                 <div class="manage-row">
-                    <span class="label" style="font-size:12px; font-weight:400; color:#8E8E93">1. 사용자</span>
+                    <span style="font-size:12px; color:#8E8E93">1. 사용자</span>
                     <div class="input-group">
                         <input type="text" id="newUserName" placeholder="이름">
                         <button class="btn btn-add" onclick="addUser()">등록</button>
@@ -337,8 +137,8 @@
                         <button class="btn btn-del" onclick="deleteUser()">삭제</button>
                     </div>
                 </div>
-                <div class="manage-row" style="border-bottom:none; margin-top: 5px; margin-bottom: 0; padding-bottom: 0;">
-                    <span class="label" style="font-size:12px; font-weight:400; color:#8E8E93">2. 사건</span>
+                <div class="manage-row" style="border-bottom:none; margin-top: 5px;">
+                    <span style="font-size:12px; color:#8E8E93">2. 사건</span>
                     <div class="input-group">
                         <input type="text" id="newEventName" placeholder="사건명">
                         <button class="btn btn-add" onclick="addEvent()">추가</button>
@@ -358,43 +158,36 @@
             <div class="record-card-desc">투사나 판단, 자기비난을 내려놓고 관찰된 사실만 적어보세요</div>
             <textarea id="step1" placeholder="❌ 판단:그 사람이 나를 무시했다&#10;✅ 사실:회의 중 내가 말을 할 때 그 사람이 휴대폰을 보았다"></textarea>
         </div>
-
         <div class="record-card">
             <div class="record-card-title">2. 감정 찾기</div>
             <div class="record-card-desc">카드에서 찾은 감정 단어 추가</div>
             <textarea id="step2"></textarea>
         </div>
-
         <div class="record-card">
             <div class="record-card-title">3. 위의 감정들을 일으킨 생각들</div>
-			<div class="record-card-desc">감정을 일으킨 내 안의 '판단'이나 '생각'들을 적어보세요.<br>(원인을 상대나 상황이 아닌 내안에서 찾아보세요.)</div>
+			<div class="record-card-desc">감정을 일으킨 내 안의 '판단'이나 '생각'들을 적어보세요.</div>
             <div id="step3" class="editable-list" contenteditable="true" data-placeholder="❌ 그 사람이 약속시간에 늦어서 나는 화가난다.&#10;✅ 그 사람이 나를 무시했다는 생각에 화가난다."></div>
         </div>
-
         <div class="record-card">
             <div class="record-card-title">4. 핵심 욕구</div>
 			<div class="record-card-desc">욕구카드에서 찾은 욕구 단어들을 추가</div>
             <textarea id="step4"></textarea>
         </div>
-
         <div class="record-card">
             <div class="record-card-title">5. 욕구 강화</div>
-			<div class="record-card-desc">이 욕구가 나에게 왜 그토록 중요한 이유를 적어보세요.<br>(나는 '욕구'를 원한다. 왜냐하면 ~ 때문이다. )</div>
+			<div class="record-card-desc">이 욕구가 나에게 왜 그토록 중요한 이유를 적어보세요.</div>
             <div id="step5" class="editable-list" contenteditable="true"></div>
         </div>
-
         <div class="record-card">
             <div class="record-card-title">6. 구체적인 행동</div>
-			<div class="record-card-desc">나와 상대의 욕구를 강화를 위한 긍정적이고 구체적이며 내가 할 수 있는 실천3가지</div>
+			<div class="record-card-desc">나와 상대의 욕구를 강화를 위한 긍정적 실천 3가지</div>
             <div id="step6" class="editable-list" contenteditable="true" data-placeholder="❌ 나는 저녁시간에 스마트폰을 보지않겠다.&#10;✅ 나는 저녁시간에 30분씩 산책을 하겠다."></div>
         </div>
-
         <div class="record-card">
             <div class="record-card-title">7. 정리 및 통합</div>
 			<div class="record-card-desc">새롭게 알게된 점이나 나에게 해주고 싶은 말</div>
             <textarea id="step7"></textarea>
         </div>
-
         <div class="record-card" style="border-top: 5px solid var(--connection-core);">
             <div class="record-card-title">8. 상대의 욕구 인식</div>
 			<div class="record-card-desc">상대방의 욕구 공유하기</div>
@@ -410,9 +203,7 @@
                 <span class="section-label">사건  + 질문(Gemini 도움받기)</span>
                 <textarea id="step9" placeholder="예: 위의 사건과 감정을 바탕으로 나에게 필요한 공감과 위로를 해줘."></textarea>
                 <button class="copy-btn btn-q1" onclick="copyQ1()">📋 복사: 사건 + 질문</button>
-
                 <div style="height: 15px; border-bottom: 1px solid #eee; margin-bottom: 15px;"></div>
-
                 <span class="section-label">전체내용 + 질문 (상대에게 요청하기)</span>
                 <textarea id="step9_extra" placeholder="예: 1~6번 내용을 바탕으로 나의 욕구와 상대의 욕구를 조화시킬 대화법을 제안해줘."></textarea>
                 <button class="copy-btn btn-q2" onclick="copyQ2()">📋 복사: 1~6번 + 질문</button>
@@ -421,11 +212,9 @@
     </div>
 </section>
 
-<!-- 2. ACIM 정화 명상 섹션 -->
 <section id="acim-section" class="content-section">
     <div class="acim-container" id="acim-main-container">
         <audio id="step-audio" preload="auto"></audio>
-
         <div class="acim-card" style="border-top: 5px solid var(--primary-blue); text-align: center;">
             <button id="audio-toggle-sq" class="acim-audio-btn-sq" onclick="toggleAudio()">
                 <span id="audio-icon">▶ 가이드 음성 재생</span>
@@ -435,13 +224,12 @@
         <div id="acim-input-section" class="acim-content-wrapper">
             <div class="acim-card">
                 <label>정화하고 싶은 사건 / 기억</label>
-                <div class="acim-card-desc">🔗 마음 관찰 기록의 <span style="color:var(--accent-blue); font-weight:bold;">'1. 사건 인식'</span> 란의 텍스트가 실시간 연동됩니다.</div>
+                <div class="acim-card-desc">🔗 마음 관찰 기록의 <span style="color:var(--accent-blue); font-weight:bold;">'1. 사건 인식'</span> 연동</div>
                 <textarea id="acim-event" readonly placeholder="마음 관찰 기록 탭에서 먼저 사건을 작성해 주세요."></textarea>
             </div>
-            
             <div class="acim-card" style="border-top: 5px solid var(--danger-red);">
                 <label>나의 판단이나 생각</label>
-                <div class="acim-card-desc">🔗 마음 관찰 기록의 <span style="color:var(--danger-red); font-weight:bold;">'3. 감정을 일으킨 생각들'</span> 란의 텍스트가 실시간 연동됩니다.</div>
+                <div class="acim-card-desc">🔗 마음 관찰 기록의 <span style="color:var(--danger-red); font-weight:bold;">'3. 감정을 일으킨 생각들'</span> 연동</div>
                 <textarea id="acim-judgment" readonly placeholder="마음 관찰 기록 탭에서 먼저 감정을 일으킨 생각을 작성해 주세요."></textarea>
             </div>
             <button class="acim-main-btn" onclick="startMeditation()">정화 명상 시작하기</button>
@@ -452,13 +240,11 @@
                 <label id="acim-step-title">단계 가이드</label>
                 <div id="acim-meditation-content" class="acim-current-step-text"></div>
             </div>
-            
             <div class="acim-card" style="border-top: 5px solid var(--success-color);">
                 <label id="acim-insight-label">통찰 기록</label>
-                <div class="acim-card-desc">안내를 음미하며 마음 깊은 곳에서 새롭게 채워지는 통찰이나 평온의 감각을 자유롭게 남깁니다.</div>
+                <div class="acim-card-desc">내면 깊은 곳에서 새롭게 채워지는 통찰이나 평온의 감각을 자유롭게 남깁니다.</div>
                 <textarea id="acim-insight" style="min-height: 90px;" placeholder="지금 이 순간 느껴지는 내면의 고요한 목소리를 받아 적어보세요..." oninput="saveCurrentInsight()"></textarea>
             </div>
-            
             <div class="acim-button-group" id="acim-nav-group">
                 <button id="acim-prev-btn" class="acim-nav-button" onclick="goToPrevStep()">이전 단계</button>
                 <button id="acim-home-btn" class="acim-nav-button" onclick="resetAcimMeditation()">처음으로</button>
@@ -469,27 +255,22 @@
     </div>
 </section>
 
-<!-- 3. 감정 카드 섹션 -->
 <section id="emotions-section" class="content-section">
     <div class="context-guide">
         <span class="context-label">지금 관찰 중인 사건</span>
         <div id="context-display-emotions" class="context-text-display">기록장에서 사건을 먼저 입력해 보세요.</div>
     </div>
     <div class="index-container" id="emotions-index"></div>
-    <div class="grid" id="emotions-grid"></div> <!-- 카드 컴포넌트 복원 영역 -->
 </section>
 
-<!-- 4. 욕구 카드 섹션 -->
 <section id="needs-section" class="content-section">
     <div class="context-guide">
         <span class="context-label">지금 관찰 중인 사건</span>
         <div id="context-display-needs" class="context-text-display">기록장에서 사건을 먼저 입력해 보세요.</div>
     </div>
     <div class="index-container" id="needs-index"></div>
-    <div class="grid" id="needs-grid"></div> <!-- 카드 컴포넌트 복원 영역 -->
 </section>
 
-<!-- 통합 공통 하단 제어 바 고정 -->
 <div class="fixed-bottom-bar" id="fixedBottomBar">
     <button class="btn-save-local" onclick="triggerManualSave()">💾 클라우드저장</button>
     <button class="btn-image" id="shareBtn" onclick="makeImage()">❤️ 이미지 공유</button>
@@ -501,22 +282,20 @@
 </div>
 
 <script>
-/* ==========================================================================
-   Supabase 설정 및 자격 증명 초기화
-   ========================================================================== */
 const SUPABASE_URL = 'https://ocghxynajjbkpbyljxzg.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jZ2h4eW5hampia3BieWxqeHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTg4MTksImV4cCI6MjA5MTI3NDgxOX0.weaiOCV0UMjsfSmEI_WU_0L4qJUOGRrtoWEwPKN26is';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jZ2h4eW5hampia3BieWxqeHzgIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2OTg4MTksImV4cCI6MjA5MTI3NDgxOX0.weaiOCV0UMjsfSmEI_WU_0L4qJUOGRrtoWEwPKN26is';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* ==========================================================================
-   기록장 및 카드 데이터 영역
-   ========================================================================== */
+// 공통 에모지 맵
+const EMOJI_MAP = {joy:"😊", love:"❤️", peace:"🌿", anx:"😰", ang:"🔥", sad:"💧", auto:"🦋", conn:"🤝", well:"🍎", meaning:"💎"};
+
+// [데이터 다이어트] 중복 단어 및 설명 구조 통합 정렬 유지
 const needsData = [
     { name: "효율성",cat: "cat-auto",desc: "최소한의 에너지나 자원으로 최대한의 결과물을 얻고, 질서 있게 일을 처리하고 싶은 마음",sat: ["뿌듯하다", "경쾌하다", "홀가분하다"],unsat: ["허탈하다", "조급하다", "무기력하다"],action: "우선순위를 정하고 불필요한 단계를 줄여보세요."},
     { name: "효능감", cat: "cat-auto", desc: "어떤 일을 성공적으로 수행할 수 있다는 자신의 능력에 대한 믿음과 확신을 얻고 싶은 마음", sat: ["자신 있다", "활기차다", "든든하다"], unsat: ["막막하다", "회의적이다", "무력하다"], action: "아주 작은 목표를 설정하고 그것을 완수하는 경험을 반복해보세요." },
     { name: "자유•자율성", cat: "cat-auto", desc: "자신의 가치와 꿈에 따라 스스로 선택하고 행동하고 싶은 마음", sat: ["행복하다", "만족하다"], unsat: ["답답하다", "억울하다"], action: "나만의 시간을 확보하세요." },
     { name: "공정함", cat: "cat-auto", desc: "내가 노력한 만큼 정당한 대가와 대우를 받고, 치우침 없이 평등하게 다루어지길 바라는 욕구", sat: ["홀가분하다", "신뢰감을 느끼다"], unsat: ["억울하다", "분개하다"], action: "개인의 편견을 내려놓고 정해진 기준과 원칙에 따라 투명하게 대치해보세요." },
-    { name: "명확함", cat: "cat-auto", desc: "상황이나 정보, 상대의 의도를 왜곡 없이 투명하고 확실하게 알고 싶은 욕구", sat: ["홀가분하다", "홀가분하다"], unsat: ["혼란스럽다", "답답하다"], action: "모호한 짐작을 내려놓고, 구체적인 사실을 확인하거나 상대에게 명확한 질문을 건네보세요." },
+    { name: "명확함", cat: "cat-auto", desc: "상황이나 정보, 상대의 의도를 왜곡 없이 투명하고 확실하게 알고 싶은 욕구", sat: ["홀가분하다"], unsat: ["혼란스럽다", "답답하다"], action: "모호한 짐작을 내려놓고, 구체적인 사실을 확인하거나 상대에게 명확한 질문을 건네보세요." },
     { name: "선택", cat: "cat-auto", desc: "나의 의지로 방향을 정하고 결정하고 싶은 마음", sat: ["자랑스럽다", "기쁘다"], unsat: ["답답하다", "억울하다"], action: "사소한 결정부터 직관에 따라 결정해 보세요." },
     { name: "혼자만의 시간과 공간", cat: "cat-auto", desc: "온전히 나 자신과 마주하고 싶은 욕구", sat: ["편안하다", "만족하다"], unsat: ["답답하다", "불편하다"], action: "아지트에서 1시간 동안 집중해 보세요." },
     { name: "자기표현", cat: "cat-auto", desc: "나만의 고유한 생각과 개성을 외부로 드러내고 싶은 욕구", sat: ["기쁘다", "자랑스럽다"], unsat: ["답답하다", "부끄럽다"], action: "독창적인 생각을 기록해 보세요." },
@@ -526,7 +305,7 @@ const needsData = [
     { name: "이해", cat: "cat-conn", desc: "나의 마음이 정확히 전달되고 수용되기를 바라는 마음", sat: ["감동하다", "편안하다"], unsat: ["서운하다", "답답하다"], action: "소통의 오해를 확인해 보세요." },
     { name: "존중", cat: "cat-conn", desc: "가치를 인정받고 소중히 다뤄지기를 바라는 마음", sat: ["뿌듯하다", "든든하다"], unsat: ["억울하다", "속상하다"], action: "받고 싶은 대우를 요청하세요." },
     { name: "상호존중", cat: "cat-conn", desc: "서로의 다름을 인정하고, 품격 있는 태도로 서로의 존재와 가치를 소중히 여기고 싶은 마음", sat: ["존중받다", "든든하다", "편안하다"], unsat: ["무시당하다", "불쾌하다", "비참하다"], action: "상대방의 말을 끝까지 듣고 비판 없이 수용하는 연습을 해보세요." },
-    { name: "관심", cat: "cat-conn", desc: "누군가 내 존재를 알아주기를 바라는 마음", sat: ["반갑다", "행복하다"], unsat: ["서운하다", "외롭다"], action: "나에 대해 질문해달라고 요청하세요." },
+    { name: "관심", cat: "cat-conn", desc: "누군가 내 존재을 알아주기를 바라는 마음", sat: ["반갑다", "행복하다"], unsat: ["서운하다", "외롭다"], action: "나에 대해 질문해달라고 요청하세요." },
     { name: "소통", cat: "cat-conn", desc: "생각과 느낌을 주고받으며 연결을 맺는 행위", sat: ["반갑다", "재미있다"], unsat: ["답답하다", "어색하다"], action: "끝까지 듣고 요약해 보세요." },
     { name: "신뢰", cat: "cat-conn", desc: "믿고 의지할 수 있는 단단한 관계의 토대", sat: ["든든하다", "편안하다"], unsat: ["불안하다", "걱정하다"], action: "작은 도움을 요청해 보세요." },
     { name: "협력", cat: "cat-conn", desc: "공통 목표를 위해 힘을 합치고 싶은 바람", sat: ["든든하다", "뿌듯하다"], unsat: ["답답하다", "귀찮다"], action: "상대에게 도움을 요청하세요." },
@@ -581,7 +360,7 @@ const needsData = [
     { name: "자부심", cat: "cat-meaning", desc: "자신의 능력이나 성취, 존재 가치에 대해 스스로 당당하고 명예롭게 여기고 싶은 마음", sat: ["당당하다", "자랑스럽다", "충만하다"], unsat: ["초라하다", "부끄럽다", "위축되다"], action: "오늘 내가 해낸 작은 성과나 나의 긍정적인 면을 세 가지만 기록해보세요." },
     { name: "축하", cat: "cat-meaning", desc: "기쁜 순간을 기리고 싶은 마음", sat: ["기쁘다", "감동하다"], unsat: ["서운하다", "속상하다"], action: "작은 보상을 선물하세요." },
     { name: "존재감", cat: "cat-meaning", desc: "의미 있는 존재로 인식되고 싶은 마음", sat: ["자랑스럽다", "뿌듯하다"], unsat: ["위축되다", "허탈하다"], action: "당당히 드러내세요." },
-	{ name: "평온함", cat: "cat-meaning", desc: "마음이 동요 없이 고요하고 안녕한 상태", sat: ["평화롭다", "안온하다"], unsat: ["불안하다", "초조하다"],action: "숨을 깊게 고르며 이 순간을 음미하세요."}
+	{ name: "평온함", cat: "cat-meaning", desc: "마음이 동요 없이 고요하고 안녕한 상태", sat: ["평화롭다", "안온하다"], unsat: ["불안하다", "초조하다"], action: "숨을 깊게 고르며 이 순간을 음미하세요."}
 ];
 
 const emotionsData = [
@@ -595,7 +374,7 @@ const emotionsData = [
     { name: "편안하다", cat: "cat-joy", desc: "긴장이 풀리고 안정을 되찾은 상태", sit: "따뜻한 차를 마시며 쉴 때", body: "눈꺼풀이 가벼워지고 손끝과 발끝까지 이완됨", aff: "나는 모든 긴장을 내려놓고 평온에 머눕니다." },
     { name: "뿌듯하다", cat: "cat-joy", desc: "노력이 결실을 맺어 내면이 꽉 찬 성취감", sit: "하루의 할 일을 성실히 마친 순간", body: "가슴 상부가 넓게 확장되는 느낌과 가벼운 고양감", aff: "성실하게 채워온 나의 시간이 자랑스럽습니다." },
     { name: "기대하다", cat: "cat-joy", desc: "긍정적 변화를 상상하며 샘솟는 활기", sit: "새로운 도전이나 기다리던 만남 전", body: "몸이 앞으로 기울어지고 눈빛이 반짝이며 에너지가 상승함", aff: "찾아올 멋진 미래를 설레며 기다립니다." },
-    { name: "반갑다", cat: "cat-joy", desc: "존재를 다시 마주하며 연결이 회복되는 기쁨", sit: "친한 친구를 오랜만에 만났을 때", body: "목소리 톤이 높아지고 손동작이 커지며 심박수가 증가함", aff: "만남이 주는 활기찬 에너지를 맞이합니다." },
+    { name: "반갑다", cat: "cat-joy", desc: "존재을 다시 마주하며 연결이 회복되는 기쁨", sit: "친한 친구를 오랜만에 만났을 때", body: "목소리 톤이 높아지고 손동작이 커지며 심박수가 증가함", aff: "만남이 주는 활기찬 에너지를 맞이합니다." },
     { name: "신나다", cat: "cat-joy", desc: "기대로 인해 몸에 활발한 에너지가 도는 상태", sit: "공연을 보러 가기 직전이나 여행길", body: "손발을 가만히 두기 어렵고 몸에 가벼운 전율이 느껴짐", aff: "내 안의 즐거운 에너지가 힘차게 솟구칩니다." },
     { name: "재미있다", cat: "cat-joy", desc: "흥미로운 자극에 몰입하여 유쾌한 즐거움", sit: "좋아하는 취미 생활에 몰입할 때", body: "입꼬리가 올라가고 눈 주변의 근육이 부드러워짐", aff: "삶은 즐거운 놀이터이며 매 순간을 즐깁니다." },
     { name: "당당하다", cat: "cat-joy", desc: "가치와 신념에 확신을 가져 곧고 떳떳한 상태", sit: "진실을 말하거나 원칙에 따라 행동할 때", body: "발바닥이 지면에 단단히 닿은 느낌과 목소리에 힘이 실림", aff: "나는 나의 존재와 선택에 확신이 있습니다." },
@@ -619,13 +398,13 @@ const emotionsData = [
     { name: "막막하다", cat: "cat-anx", desc: "길이 보이지 않아 무력한 상태", sit: "진로 등 선택지가 보이지 않을 때", body: "눈앞이 흐릿한 기분과 함께 깊은 숨이 자주 나옴", aff: "한 걸음씩 나아갑니다. 길은 만들어집니다." },
     { name: "위축되다", cat: "cat-anx", desc: "자신감이 줄어들고 마음이 오그라드는 상태", sit: "비난을 받거나 비교를 당할 때", body: "가슴을 웅크리게 되고 목소리가 기어들어 가듯 작아짐", aff: "나는 그 자체로 고유한 빛을 가진 존재입니다." },
     { name: "답답하다", cat: "cat-ang", desc: "소통과 자유가 해소되지 못하고 갇힌 기분", sit: "말이 통하지 않거나 정체되어 있을 때", body: "가슴 한복판이 꽉 막힌 느낌과 목이 조이는 듯함", aff: "답답함은 변화를 원한다는 신호입니다." },
-    { name: "억울하다", cat: "cat-ang", desc: "공정함이 훼손되었다고 느껴지는 분노", sit: "오해받거나 기여가 무시당했을 때", body: "눈시울이 뜨거워지고 이가 갈리며 주먹에 힘이 들어감", aff: "진실은 나를 지켜줄 것입니다." },
+    { name: "억울하다", cat: "cat-ang", desc: "공정함이 훼셋되었다고 느껴지는 분노", sit: "오해받거나 기여가 무시당했을 때", body: "눈시울이 뜨거워지고 이가 갈리며 주먹에 힘이 들어감", aff: "진실은 나를 지켜줄 것입니다." },
     { name: "짜증나다", cat: "cat-ang", desc: "불만족이 반복되어 날카로운 상태", sit: "피로가 쌓인 상태에서 소음을 겪을 때", body: "얼굴 근육이 팽팽해지고 목소리가 날카워지며 미간을 찌푸림", aff: "나는 감정의 주인이며 평온을 선택합니다." },
     { name: "불쾌하다", cat: "cat-ang", desc: "어떤 사물이나 상황이 마음에 들지 않아 기분이 좋지 않고 꺼림칙한 상태", sit: "무례한 행동을 목격하거나, 위생적이지 못한 환경에 처했을 때", body: "미간이 찌푸려지고 몸이 움츠러들며, 기운이 소모되는 느낌이 듦", aff: "불편한 원인을 살피고, 나를 보호하기 위해 적절한 거리를 둡니다." },
     { name: "분하다", cat: "cat-ang", desc: "부당한 일로 울분이 가득 찬 상태", sit: "노력을 가로채이거나 상처 입었을 때", body: "얼굴이 붉어지고 몸에 열이 오르며 거친 숨을 내쉼", aff: "지혜로운 대처를 통해 나를 지겠습니다." },
     { name: "밉다", cat: "cat-ang", desc: "원망스러워 거리감을 두고 싶은 감정", sit: "진심을 무시한 상대가 떠오를 때", body: "입술을 굳게 다물게 되고 상대 쪽으로 고개를 돌리기 싫어짐", aff: "미움 대신 나를 아끼는 마음을 채웁니다." },
     { name: "원망스럽다", cat: "cat-ang", desc: "고통의 책임을 상대에게 돌리는 아픈 마음", sit: "결정적 순간에 곁에 없었던 이에 대한 서운함", body: "가슴 깊은 곳이 쓰리고 명치 부근이 딱딱해짐", aff: "기대를 내려놓고 스스로를 돕습니다." },
-    { name: "얄밉다", cat: "cat-ang", desc: "타인의 행동이 공정함에 어긋나 보이는 거부감", sit: "책임을 회피하며 이득만 챙기는 이를 볼 때", body: "코웃음이 나거나 눈매가 가늘어지며 혀를 차게 됨", aff: "타인에게 휘둘리지 않고 품위를 유지합니다." },
+    { name: "얄밉다", cat: "cat-ang", desc: "타인의 행동이 공정함에 어긋나 보이는 거부감", sit: "책임을 회피하며 이득만 챙기는 이를 볼 때", body: "코웃음이 나거나눈매가 가늘어지며 혀를 차게 됨", aff: "타인에게 휘둘리지 않고 품위를 유지합니다." },
     { name: "질투하다", cat: "cat-ang", desc: "남의 것을 보고 나의 결핍이 자극되는 시기", sit: "타인의 성과를 축하하기 힘들 때", body: "속이 뒤틀리는 느낌과 함께 가슴이 서늘해짐", aff: "타인의 성취는 나의 가능성을 보여주는 거울입니다." },
     { name: "불편하다", cat: "cat-ang", desc: "평온이 깨져 대상을 피하고 싶은 방어 상태", sit: "가치관이 맞지 않는 사람과 있을 때", body: "몸이 뻣뻣해지고 자꾸 자세를 바꾸게 되며 시선을 피함", aff: "나의 경계를 지키며 지혜롭게 지나갑니다." },
     { name: "어색하다", cat: "cat-ang", desc: "분위기 속에서 행동이 부자연스러운 상태", sit: "서먹한 이와 단둘이 남겨졌을 때", body: "손을 어디에 둘지 모르겠고 미소가 부자연스러움", aff: "어색함조차 과정입니다. 가벼운 미소를 지어봅니다." },
@@ -645,7 +424,7 @@ const emotionsData = [
     { name: "지루하다", cat: "cat-sad", desc: "의미를 발견하지 못해 시간이 정체된 상태", sit: "단조로운 일상이 반복될 때", body: "하품이 나오고 턱을 괴거나 몸을 비틀게 됨", aff: "지루함 속에 영감의 씨앗이 있습니다." },
     { name: "피곤하다", cat: "cat-sad", desc: "쉼을 강력하게 요청하는 고갈 신호", sit: "쉼 없이 달려와 모든 의욕이 사라질 때", body: "머리가 무겁고 눈이 따가우며 뒷목이 빳빳함", aff: "고생한 나에게 깊은 휴식을 선물합니다." },
     { name: "부럽다", cat: "cat-sad", desc: "타인의 처지로 결핍이 자극되는 시기", sit: "친구의 성공 소식을 보았을 때", body: "시선이 자꾸 아래로 향하고 가슴 한구석이 쿡쿡 쑤심", aff: "나에게는 나만의 고유한 행복이 이미 있습니다." },
-    { name: "괴롭다", cat: "cat-sad", desc: "고통이 극심하여 벗어나고 싶은 간절함", sit: "상처가 떠오르거나 현실이 힘들 때", body: "온몸의 근육이 뒤틀리는 듯하고 가슴이 찢어지는 통증", aff: "고통을 따뜻하게 안아주며 치유합니다." },
+    { name: "괴롭다", cat: "cat-sad", desc: "고통이 극심하여 벗어나고 싶은 간절함", sit: "상처가 떠오르거나 현실이 힘들 때", body: "온몸의 근욕이 뒤틀리는 듯하고 가슴이 찢어지는 통증", aff: "고통을 따뜻하게 안아주며 치유합니다." },
     { name: "그리워하다", cat: "cat-sad", desc: "부재하는 대상과 연결되고 싶은 상태", sit: "이별한 이의 유품이나 흔적을 볼 때", body: "가슴 부근이 아련하게 저리고 목소리가 떨림", aff: "그리움은 내가 사랑했다는 증거입니다." },
     { name: "실망하다", cat: "cat-sad", desc: "기대가 무너져 허탈하고 신뢰가 흔들림", sit: "믿었던 이의 무심한 모습을 보았을 때", body: "몸에서 기운이 빠져나가며 입안이 마르는 느낌", aff: "실망은 환상이 걷힌 자리에 진실을 세우는 일입니다." },
     { name: "서럽다", cat: "cat-sad", desc: "억울함과 슬픔이 북받쳐 오르는 아픈 마음", sit: "혼자 아프거나 오해받을 때", body: "어깨를 떨며 흐느끼게 되고 가슴이 요동침", aff: "내 마음의 울음을 충분히 들어주겠습니다." },
@@ -654,18 +433,24 @@ const emotionsData = [
     { name: "허탈하다", cat: "cat-sad", desc: "결과가 무너져 에너지가 빠져나간 허전함", sit: "노력이 수포로 돌아갔을 때", body: "팔다리에 힘이 하나도 없고 가슴 속이 텅 빈 구멍 같음", aff: "비워진 마음을 인정하며 새로운 에너지를 기다립니다." }
 ];
 
-/* --- 데이터 로컬 키 제어 --- */
+const scripts = [
+    { title: "안내: 정화 준비", text: "정화하고 싶은 사건과 판단을 적어주세요.", audio: "audio/step0.mp3" },
+    { title: "준비: 마음 가다듬기", text: "잠시 눈을 감고 깊게 숨을 들이마시고 내뱉습니다.\n이제 성령께 이 기억을 맡길 준비를 합니다.", audio: "audio/step1.mp3" },
+    { title: "1단계: 성령께 맡기기", text: `"나는 이 사건을 내가 생각하는 의미로 이해하지 않겠습니다." \n\n"나는 이 상황을 다른 관점에서 보겠습니다."`, audio: "audio/step2.mp3" },
+    { title: "2단계: 기억의 정화", text: `"내가 이 기억에 대해 느끼는 분노는 내가 보고 있는 과거에 근거한 것이며, 지금 여기에는 존재하지 않습니다."`, audio: "audio/step3.mp3" },
+    { title: "3단계: 용서와 취소", text: `"성령님, 제가 이 기억을 당신의 시각으로 보게 도와주십시오."\n\n과거의 무거운 짐을 내려놓습니다.`, audio: "audio/step4.mp3" },
+    { title: "4단계: 평온과 기적", text: `"내면에 있는 본래의 평온과 하나가 됩니다.\n갈등이 완전히 사라진 자리에 기적과 사랑을 흔쾌히 수용합니다."`, audio: "audio/step5.mp3" }
+];
+
+let currentStepIndex = -1, stepInsights = {}, audioPlayer, audioIcon, audioBtn;
+
 function getStorageKey() { 
-    const u = document.getElementById("userSelect").value;
-    const e = document.getElementById("eventSelect").value;
-    return `mindApp_${u || "guest"}_${e || "default"}`; 
+    return `mindApp_${document.getElementById("userSelect").value || "guest"}_${document.getElementById("eventSelect").value || "default"}`; 
 }
 
-/* --- 데이터 백엔드 통합 저장 로직 (Supabase + LocalStorage) --- */
 async function triggerManualSave() {
     const u = document.getElementById("userSelect").value;
     const e = document.getElementById("eventSelect").value;
-    
     saveAllToLocal();
 
     if (!u || u === "사용자 없음" || !e || e === "사건 없음") {
@@ -674,81 +459,47 @@ async function triggerManualSave() {
     }
 
     const recordData = {
-        user_name: u,
-        event_name: e,
-        title: document.getElementById("mainTitle").value,
-        step1: document.getElementById("step1").value,
-        step2: document.getElementById("step2").value,
-        step3: document.getElementById("step3").innerText,
-        step4: document.getElementById("step4").value,
-        step5: document.getElementById("step5").innerText,
-        step6: document.getElementById("step6").innerText,
-        step7: document.getElementById("step7").value,
-        step8: document.getElementById("step8").value,
-        acim_insight_1: stepInsights[1] || "",
-        acim_insight_2: stepInsights[2] || "",
-        acim_insight_3: stepInsights[3] || "",
-        acim_insight_4: stepInsights[4] || "",
-        acim_insight_5: stepInsights[5] || "",
-        updated_at: new Date().toISOString()
+        user_name: u, event_name: e, title: document.getElementById("mainTitle").value,
+        step1: document.getElementById("step1").value, step2: document.getElementById("step2").value,
+        step3: document.getElementById("step3").innerText, step4: document.getElementById("step4").value,
+        step5: document.getElementById("step5").innerText, step6: document.getElementById("step6").innerText,
+        step7: document.getElementById("step7").value, step8: document.getElementById("step8").value,
+        acim_insight_1: stepInsights[1] || "", acim_insight_2: stepInsights[2] || "", acim_insight_3: stepInsights[3] || "",
+        acim_insight_4: stepInsights[4] || "", acim_insight_5: stepInsights[5] || "", updated_at: new Date().toISOString()
     };
 
     try {
-        const { error } = await supabaseClient
-            .from('combine_mind_records')
-            .upsert(recordData, { onConflict: 'user_name,event_name' });
-
+        const { error } = await supabaseClient.from('combine_mind_records').upsert(recordData, { onConflict: 'user_name,event_name' });
         if (error) throw error;
         alert("✨ [성공] 브라우저 및 Supabase 클라우드 서버 백업 동기화가 모두 완료되었습니다!");
     } catch (err) {
-        console.error("Supabase Sync Failed:", err);
-        alert("💾 브라우저 로컬 저장은 안전하게 완료되었으나, 네트워크 지연으로 인해 클라우드 백업은 실패했습니다. (나중에 다시 시도해 주세요)");
+        alert("💾 브라우저 로컬 저장은 안전하게 완료되었으나, 네트워크 지연으로 인해 클라우드 백업은 실패했습니다.");
     }
 }
 
-/* --- 공통 유틸리티 --- */
-function autoResizeTextarea(element) {
-    if (!element) return;
-    element.style.height = 'auto'; 
-    element.style.height = element.scrollHeight + 'px'; 
+function autoResizeTextarea(el) {
+    if (!el) return;
+    el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; 
 }
 
 function toggleAdminPanel() {
-    const content = document.getElementById("adminContent");
-    const icon = document.getElementById("toggleIcon");
-    const statusText = document.getElementById("adminStatusText");
-    const user = document.getElementById("userSelect").value || "없음";
-    const event = document.getElementById("eventSelect").value || "없음";
-    if (content.classList.contains("show")) {
-        content.classList.remove("show"); icon.innerText = "▼";
-        statusText.innerText = `⚙️ 설정 (사용자: ${user} / 사건: ${event})`;
-    } else {
-        content.classList.add("show"); icon.innerText = "▲";
-        statusText.innerText = "⚙️ 사용자 및 사건 설정";
-    }
+    const content = document.getElementById("adminContent"), icon = document.getElementById("toggleIcon"), statusText = document.getElementById("adminStatusText");
+    const isShow = content.classList.toggle("show");
+    icon.innerText = isShow ? "▲" : "▼";
+    statusText.innerText = isShow ? "⚙️ 사용자 및 사건 설정" : `⚙️ 설정 (사용자: ${document.getElementById("userSelect").value} / 사건: ${document.getElementById("eventSelect").value})`;
 }
 
 function showSection(type) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-    document.getElementById('btn-' + type).classList.add('active');
-    document.getElementById(type + '-section').classList.add('active');
-    
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === 'btn-' + type));
+    document.querySelectorAll('.content-section').forEach(s => s.classList.toggle('active', s.id === type + '-section'));
     document.getElementById('fixedBottomBar').style.display = (type === 'record' || type === 'acim') ? 'flex' : 'none';
     
     if (type === 'acim') {
-        const evVal = document.getElementById('step1').value;
-        const jdVal = document.getElementById('step3').innerText;
-        const acimEv = document.getElementById('acim-event');
-        const acimJd = document.getElementById('acim-judgment');
-        if (acimEv && acimJd) {
-            acimEv.value = evVal;
-            acimJd.value = jdVal;
-            autoResizeTextarea(acimEv);
-            autoResizeTextarea(acimJd);
-        }
+        const acimEv = document.getElementById('acim-event'), acimJd = document.getElementById('acim-judgment');
+        acimEv.value = document.getElementById('step1').value;
+        acimJd.value = document.getElementById('step3').innerText;
+        autoResizeTextarea(acimEv); autoResizeTextarea(acimJd);
     }
-    
     if(type !== 'record' && type !== 'acim') renderGrid(type);
     updateContextDisplay(document.getElementById('step1').value);
 }
@@ -760,653 +511,273 @@ function updateContextDisplay(val) {
 }
 
 function addToRecord(type, name, btnElement) {
-    const stepId = (type === 'emotions') ? 'step2' : 'step4';
-    const target = document.getElementById(stepId);
-    const sourceData = (type === 'emotions') ? emotionsData : needsData;
-    const item = sourceData.find(d => d.name === name);
-    const description = item ? item.desc : "";
-    const entryText = `• ${name} : ${description}`;
+    const target = document.getElementById(type === 'emotions' ? 'step2' : 'step4');
+    const item = (type === 'emotions' ? emotionsData : needsData).find(d => d.name === name);
+    const entryText = `• ${name} : ${item ? item.desc : ""}`;
     
-    let currentValue = target.value || target.innerText;
-    const lines = currentValue.split('\n');
-    const isDuplicate = lines.some(line => line.trim().startsWith(`• ${name} :`));
-
-    if (isDuplicate) { 
-        alert("이미 기록장에 추가된 항목입니다.");
-        closeModal();
-        return; 
+    if ((target.value || target.innerText).split('\n').some(line => line.trim().startsWith(`• ${name} :`))) { 
+        alert("이미 기록장에 추가된 항목입니다."); closeModal(); return; 
     }
 
-    const newValue = currentValue.trim() ? `${currentValue.trim()}\n${entryText}` : entryText;
-    
-    if (target.tagName === "TEXTAREA") {
-        target.value = newValue; 
-        autoResizeTextarea(target); 
-    } else {
-        target.innerText = newValue;
-    }
+    const orig = target.value || target.innerText;
+    const newValue = orig.trim() ? `${orig.trim()}\n${entryText}` : entryText;
+    if (target.tagName === "TEXTAREA") { target.value = newValue; autoResizeTextarea(target); } else { target.innerText = newValue; }
     
     saveAllToLocal();
-
-    const originalText = btnElement.innerHTML;
-    btnElement.innerHTML = `✅ 추가됨`;
-    
-    setTimeout(() => {
-        btnElement.innerHTML = originalText;
-        closeModal(); 
-    }, 300);
+    const originalText = btnElement.innerHTML; btnElement.innerHTML = `✅ 추가됨`;
+    setTimeout(() => { btnElement.innerHTML = originalText; closeModal(); }, 300);
 }
 
 function openModal(type, name) {
-    const data = type === 'needs' ? needsData : emotionsData;
-    const item = data.find(d => d.name === name);
-    const modal = document.getElementById('cardModal');
-    const body = document.getElementById('modalBody');
-    
-    const emojis = {joy:"😊", love:"❤️", peace:"🌿", anx:"😰", ang:"🔥", sad:"💧", auto:"🦋", conn:"🤝", well:"🍎", meaning:"💎"};
-    const emoji = emojis[item.cat.split('-')[1]] || "✨";
-
-    let content = `
-        <div style="font-size:60px; text-align:center; margin-bottom:10px;">${emoji}</div>
-        <div class="title">${item.name}</div>
-        <div class="desc">${item.desc}</div>
-    `;
+    const item = (type === 'needs' ? needsData : emotionsData).find(d => d.name === name);
+    const catKey = item.cat.split('-')[1];
+    let content = `<div style="font-size:60px; text-align:center; margin-bottom:10px;">${EMOJI_MAP[catKey] || "✨"}</div><div class="title">${item.name}</div><div class="desc">${item.desc}</div>`;
 
     if (type === 'needs') {
-        content += `
-            <span class="section-label">충족 시</span>
-            <div>${item.sat.map(s => `<span class="emotion-tag tag-sat">${s}</span>`).join('')}</div>
-            <span class="section-label">미충족 시</span>
-            <div>${item.unsat.map(s => `<span class="emotion-tag tag-unsat">${s}</span>`).join('')}</div>
-            <div class="action-box" style="margin-top:20px;">${item.action}</div>
-        `;
+        content += `<span class="section-label">충족 시</span><div>${item.sat.map(s => `<span class="emotion-tag tag-sat">${s}</span>`).join('')}</div><span class="section-label">미충족 시</span><div>${item.unsat.map(s => `<span class="emotion-tag tag-unsat">${s}</span>`).join('')}</div><div class="action-box" style="margin-top:20px;">${item.action}</div>`;
     } else {
-        content += `
-            <span class="section-label">상황</span><div class="content-text">${item.sit}</div>
-            <span class="section-label">몸의 상태</span><div class="body-status">${item.body}</div>
-            <span class="section-label">확언</span><div class="affirmation-box" style="background:#f9f9f9; padding:15px; border-radius:10px; font-style:italic;">"${item.aff}"</div>
-        `;
+        content += `<span class="section-label">상황</span><div class="content-text">${item.sit}</div><span class="section-label">몸의 상태</span><div class="body-status">${item.body}</div><span class="section-label">확언</span><div class="affirmation-box" style="background:#f9f9f9; padding:15px; border-radius:10px; font-style:italic;">"${item.aff}"</div>`;
     }
-
     content += `<button class="add-to-record-btn" style="margin-top:25px;" onclick="addToRecord('${type}', '${item.name}', this)">＋ 기록장에 추가</button>`;
-
-    body.innerHTML = content;
-    modal.style.display = 'flex';
+    document.getElementById('modalBody').innerHTML = content;
+    document.getElementById('cardModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
 
-function closeModal(event) {
-    if (event && event.target !== event.currentTarget) return;
-    const modal = document.getElementById('cardModal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-}
-	
-/* --- [완벽 복구 및 보강] 인덱스 및 카드 컴포넌트 하이브리드 생성 --- */
+function closeModal(e) { if (!e || e.target === e.currentTarget) { document.getElementById('cardModal').style.display = 'none'; document.body.style.overflow = 'auto'; } }
+
 function renderGrid(type) {
-    const data = type === 'needs' ? needsData : emotionsData;
     const indexContainer = document.getElementById(type + '-index');
-    const gridContainer = document.getElementById(type + '-grid');
-    
-    // 이미 렌더링된 자식이 있다면 중복 렌더링을 차단합니다.
     if(indexContainer.children.length > 0) return;
 
-    const emojis = {joy:"😊", love:"❤️", peace:"🌿", anx:"😰", ang:"🔥", sad:"💧", auto:"🦋", conn:"🤝", well:"🍎", meaning:"💎"};
-
-    data.forEach(item => {
-        // 1. 상단 원클릭 모달용 인덱스 뱃지 링크 생성
+    (type === 'needs' ? needsData : emotionsData).forEach(item => {
+        const catKey = item.cat.split('-')[1];
         const link = document.createElement('div');
-        link.className = `item-link link-${item.cat.split('-')[1]}`;
-        link.innerText = item.name;
-        link.onclick = () => openModal(type, item.name);
+        link.className = `item-link link-${catKey}`; link.innerText = item.name; link.onclick = () => openModal(type, item.name);
         indexContainer.appendChild(link);
-
-        // 2. 하단 인터랙티브 플립 카드 가상화 렌더링 (CSS 입체 카드 완벽 결합)
-        const card = document.createElement('div');
-        card.className = `card ${item.cat}`;
-        
-        // 카드 자체를 터치하면 앞뒤 회전 토글
-        card.onclick = () => {
-            card.classList.toggle('is-flipped');
-        };
-
-        const emoji = emojis[item.cat.split('-')[1]] || "✨";
-        
-        // 뒷면 컨텐츠 믹싱 파이프라인
-        let backContent = `
-            <div class="title">${item.name}</div>
-            <div class="desc" style="font-size:0.85rem; margin-bottom:8px; line-height:1.4;">${item.desc}</div>
-        `;
-        
-        if (type === 'needs') {
-            backContent += `
-                <span class="section-label" style="margin-top:4px;">충족 시</span>
-                <div>${item.sat.map(s => `<span class="emotion-tag tag-sat" style="font-size:0.7rem; padding:2px 6px; margin:2px;">${s}</span>`).join('')}</div>
-                <span class="section-label" style="margin-top:4px;">미충족 시</span>
-                <div>${item.unsat.map(s => `<span class="emotion-tag tag-unsat" style="font-size:0.7rem; padding:2px 6px; margin:2px;">${s}</span>`).join('')}</div>
-                <div class="action-box" style="padding:8px; font-size:0.75rem; margin-top:8px; margin-bottom:4px; line-height:1.3;">${item.action}</div>
-            `;
-        } else {
-            backContent += `
-                <span class="section-label" style="margin-top:4px;">상황</span><div class="content-text" style="font-size:0.8rem; margin-bottom:2px;">${item.sit}</div>
-                <span class="section-label" style="margin-top:4px;">몸의 상태</span><div class="body-status" style="font-size:0.8rem; margin-bottom:2px;">${item.body}</div>
-                <div class="affirmation-box" style="background:#f9f9f9; padding:6px; border-radius:6px; font-style:italic; font-size:0.75rem; margin-top:6px; margin-bottom:4px; line-height:1.3;">"${item.aff}"</div>
-            `;
-        }
-        
-        // 버튼 클릭 이벤트는 카드 회전 버블링 방지를 위해 stopPropagation 필수 적용
-        backContent += `
-            <button class="add-to-record-btn" style="padding:8px; font-size:0.8rem; margin-top:auto;" onclick="event.stopPropagation(); addToRecord('${type}', '${item.name}', this)">
-                ＋ 기록장에 추가
-            </button>
-        `;
-
-        card.innerHTML = `
-            <div class="card-inner">
-                <div class="front">
-                    <div style="font-size:50px; margin-bottom:8px;">${emoji}</div>
-                    <div class="title">${item.name}</div>
-                    <div class="desc" style="font-size:0.85rem; color:#666; font-weight:500;">터치해서 정보 보기</div>
-                </div>
-                <div class="back" onclick="event.stopPropagation();">
-                    ${backContent}
-                </div>
-            </div>
-        `;
-        
-        gridContainer.appendChild(card);
     });
 }
 
 function addUser() { 
-    const n = document.getElementById("newUserName").value.trim(); 
-    if(!n) return; 
-    let u = JSON.parse(localStorage.getItem("mindUsers") || "[]"); 
-    if(!u.includes(n)) u.push(n); 
-    localStorage.setItem("mindUsers", JSON.stringify(u)); 
-    document.getElementById("newUserName").value = "";
-    renderUserList(n); 
+    const n = document.getElementById("newUserName").value.trim(); if(!n) return;
+    let u = JSON.parse(localStorage.getItem("mindUsers") || "[]"); if(!u.includes(n)) u.push(n);
+    localStorage.setItem("mindUsers", JSON.stringify(u)); document.getElementById("newUserName").value = ""; renderUserList(n); 
 }
-
 function deleteUser() {
-    const userName = document.getElementById("userSelect").value;
-    if (!userName || userName === "사용자 없음") return;
+    const userName = document.getElementById("userSelect").value; if (!userName || userName === "사용자 없음") return;
     if (confirm(`'${userName}'의 모든 데이터를 삭제하시겠습니까?`)) {
-        let users = JSON.parse(localStorage.getItem("mindUsers") || "[]");
-        users = users.filter(u => u !== userName);
-        localStorage.setItem("mindUsers", JSON.stringify(users));
-        renderUserList();
+        localStorage.setItem("mindUsers", JSON.stringify(JSON.parse(localStorage.getItem("mindUsers") || "[]").filter(u => u !== userName))); renderUserList();
     }
 }
-
 function renderUserList(sN) { 
-    const s = document.getElementById("userSelect"); 
-    const u = JSON.parse(localStorage.getItem("mindUsers") || "[]"); 
-    if (u.length === 0) s.innerHTML = "<option>사용자 없음</option>";
-    else {
-        s.innerHTML = u.map(x => `<option value="${x}">${x}</option>`).join(''); 
-        if(sN) s.value = sN;
-    }
-    changeUser(); 
+    const s = document.getElementById("userSelect"), u = JSON.parse(localStorage.getItem("mindUsers") || "[]");
+    s.innerHTML = u.length === 0 ? "<option>사용자 없음</option>" : u.map(x => `<option value="${x}">${x}</option>`).join('');
+    if(sN && u.includes(sN)) s.value = sN; changeUser(); 
 }
-
-function changeUser() { 
-    const currentUser = document.getElementById("userSelect").value;
-    localStorage.setItem("lastSelectedUser", currentUser); 
-    renderEventList(); 
-}
-
+function changeUser() { localStorage.setItem("lastSelectedUser", document.getElementById("userSelect").value); renderEventList(); }
 function addEvent() { 
-    const u = document.getElementById("userSelect").value; 
-    const e = document.getElementById("newEventName").value.trim(); 
-    if(!u || u === "사용자 없음" || !e) return; 
-    let evs = JSON.parse(localStorage.getItem(`events_${u}`) || "[]"); 
-    if(!evs.includes(e)) evs.push(e); 
-    localStorage.setItem(`events_${u}`, JSON.stringify(evs)); 
-    document.getElementById("newEventName").value = "";
-    renderEventList(e); 
+    const u = document.getElementById("userSelect").value, e = document.getElementById("newEventName").value.trim(); if(!u || u === "사용자 없음" || !e) return; 
+    let evs = JSON.parse(localStorage.getItem(`events_${u}`) || "[]"); if(!evs.includes(e)) evs.push(e);
+    localStorage.setItem(`events_${u}`, JSON.stringify(evs)); document.getElementById("newEventName").value = ""; renderEventList(e); 
 }
-
 function deleteEvent() {
-    const u = document.getElementById("userSelect").value;
-    const eventName = document.getElementById("eventSelect").value;
-    if (!eventName || eventName === "사건 없음") return;
-    if (confirm(`사건 '${eventName}'을 삭제합니까?`)) {
-        let evs = JSON.parse(localStorage.getItem(`events_${u}`) || "[]");
-        evs = evs.filter(e => e !== eventName);
-        localStorage.setItem(`events_${u}`, JSON.stringify(evs));
-        renderEventList();
+    const u = document.getElementById("userSelect").value, name = document.getElementById("eventSelect").value; if (!name || name === "사건 없음") return;
+    if (confirm(`사건 '${name}'을 삭제합니까?`)) {
+        localStorage.setItem(`events_${u}`, JSON.stringify(JSON.parse(localStorage.getItem(`events_${u}`) || "[]").filter(e => e !== name))); renderEventList();
     }
 }
-
-function renderEventList(sE) { 
-    const u = document.getElementById("userSelect").value; 
-    const s = document.getElementById("eventSelect"); 
-    if (!u || u === "사용자 없음") {
-        s.innerHTML = "<option>사건 없음</option>";
-        syncTitleAndLoad(); return;
-    }
-    const evs = JSON.parse(localStorage.getItem(`events_${u}`) || "[]"); 
-    if (evs.length === 0) s.innerHTML = "<option>사건 없음</option>";
-    else {
-        s.innerHTML = evs.map(x => `<option value="${x}">${x}</option>`).join(''); 
-        const lastEvent = localStorage.getItem(`lastSelectedEvent_${u}`);
-        if(sE) s.value = sE; else if (lastEvent && evs.includes(lastEvent)) s.value = lastEvent;
-    }
+function renderEventList(sE) {
+    const u = document.getElementById("userSelect").value, s = document.getElementById("eventSelect");
+    if (!u || u === "사용자 없음") { s.innerHTML = "<option>사건 없음</option>"; syncTitleAndLoad(); return; }
+    const evs = JSON.parse(localStorage.getItem(`events_${u}`) || "[]");
+    s.innerHTML = evs.length === 0 ? "<option>사건 없음</option>" : evs.map(x => `<option value="${x}">${x}</option>`).join('');
+    const last = localStorage.getItem(`lastSelectedEvent_${u}`);
+    if(sE) s.value = sE; else if (last && evs.includes(last)) s.value = last;
     syncTitleAndLoad(); 
 }
 
-/* --- 데이터 로드 로직 (로컬 선로드 후 Supabase 클라우드 실시간 대조) --- */
 async function syncTitleAndLoad() { 
-    const u = document.getElementById("userSelect").value;
-    const e = document.getElementById("eventSelect").value;
+    const u = document.getElementById("userSelect").value, e = document.getElementById("eventSelect").value;
     if(u && u !== "사용자 없음") localStorage.setItem("lastSelectedUser", u);
     if(e && e !== "사건 없음") localStorage.setItem(`lastSelectedEvent_${u}`, e);
     
     if (!u || u === "사용자 없음" || !e || e === "사건 없음") {
         document.getElementById("mainTitle").value = "";
-        for(let i=1; i<=8; i++) {
-            const el = document.getElementById("step"+i);
-            // 추천사항 보완 반영: 플레이스홀더 복원 안정성을 위해 innerHTML을 완전히 리셋
-            if(el) el.tagName === "TEXTAREA" ? el.value = "" : el.innerHTML = "";
-        }
-        document.getElementById('acim-event').value = "";
-        document.getElementById('acim-judgment').value = "";
-        document.getElementById('acim-insight').value = "";
-        stepInsights = {};
-        loadStep9Global(); return;
+        for(let i=1; i<=8; i++) { const el = document.getElementById("step"+i); if(el) el.tagName === "TEXTAREA" ? el.value = "" : el.innerHTML = ""; }
+        document.getElementById('acim-event').value = ""; document.getElementById('acim-judgment').value = ""; document.getElementById('acim-insight').value = "";
+        stepInsights = {}; loadStep9Global(); return;
     }
     
-    // 1단계: 로컬 선행 로드
     const key = getStorageKey(); 
     document.getElementById("mainTitle").value = localStorage.getItem(key + "_title") || e || "";
     for(let i=1; i<=8; i++) {
-        const val = localStorage.getItem(key + "_step" + i) || "";
-        const el = document.getElementById("step"+i);
-        if(!el) continue;
-        if(el.tagName === "TEXTAREA") { el.value = val; autoResizeTextarea(el); }
-        else el.innerText = val;
+        const val = localStorage.getItem(key + "_step" + i) || "", el = document.getElementById("step"+i);
+        if(!el) continue; if(el.tagName === "TEXTAREA") { el.value = val; autoResizeTextarea(el); } else el.innerText = val;
     }
-    
-    stepInsights = {};
-    for(let i=1; i<=5; i++) {
-        stepInsights[i] = localStorage.getItem(key + "_acim_insight_" + i) || "";
-    }
+    stepInsights = {}; for(let i=1; i<=5; i++) stepInsights[i] = localStorage.getItem(key + "_acim_insight_" + i) || "";
 
-    // 2단계: Supabase 서버 오버레이 대조
     try {
-        const { data, error } = await supabaseClient
-            .from('combine_mind_records')
-            .select('*')
-            .eq('user_name', u)
-            .eq('event_name', e)
-            .maybeSingle();
-
-        if (!error && data) {
+        const { data } = await supabaseClient.from('combine_mind_records').select('*').eq('user_name', u).eq('event_name', e).maybeSingle();
+        if (data) {
             document.getElementById("mainTitle").value = data.title || "";
-            document.getElementById("step1").value = data.step1 || "";
-            document.getElementById("step2").value = data.step2 || "";
-            document.getElementById("step3").innerText = data.step3 || "";
-            document.getElementById("step4").value = data.step4 || "";
-            document.getElementById("step5").innerText = data.step5 || "";
-            document.getElementById("step6").innerText = data.step6 || "";
-            document.getElementById("step7").value = data.step7 || "";
-            document.getElementById("step8").value = data.step8 || "";
-            
-            stepInsights[1] = data.acim_insight_1 || "";
-            stepInsights[2] = data.acim_insight_2 || "";
-            stepInsights[3] = data.acim_insight_3 || "";
-            stepInsights[4] = data.acim_insight_4 || "";
-            stepInsights[5] = data.acim_insight_5 || "";
-            
-            localStorage.setItem(key + "_title", data.title || "");
             for(let i=1; i<=8; i++) {
-                localStorage.setItem(key + "_step" + i, i === 3 || i === 5 || i === 6 ? data["step" + i] : data["step" + i]);
+                const el = document.getElementById("step"+i); if(!el) continue;
+                if(el.tagName === "TEXTAREA") { el.value = data["step"+i] || ""; autoResizeTextarea(el); } else el.innerText = data["step"+i] || "";
+                localStorage.setItem(key + "_step" + i, data["step"+i] || "");
             }
-            for(let i=1; i<=5; i++) {
-                localStorage.setItem(key + "_acim_insight_" + i, stepInsights[i]);
-            }
+            for(let i=1; i<=5; i++) { stepInsights[i] = data["acim_insight_" + i] || ""; localStorage.setItem(key + "_acim_insight_" + i, stepInsights[i]); }
+            localStorage.setItem(key + "_title", data.title || "");
         }
-    } catch (err) {
-        console.log("Supabase Fetch Bypass:", err);
-    }
+    } catch (err) {}
     
-    // ACIM 연동 동기화
-    const evVal = document.getElementById('step1').value;
-    const jdVal = document.getElementById('step3').innerText;
-    const acimEv = document.getElementById('acim-event');
-    const acimJd = document.getElementById('acim-judgment');
-    if (acimEv && acimJd) {
-        acimEv.value = evVal;
-        acimJd.value = jdVal;
-        autoResizeTextarea(acimEv);
-        autoResizeTextarea(acimJd);
-    }
-    
-    currentStepIndex = -1;
-    document.getElementById('acim-input-section').style.display = 'flex';
-    document.getElementById('acim-meditation-section').style.display = 'none';
-    document.getElementById('acim-nav-group').style.display = 'flex';
-    document.getElementById('acim-reset-btn').style.display = 'none';
-    document.getElementById('acim-insight').value = '';
-
-    updateContextDisplay(document.getElementById('step1').value);
-    loadStep9Global();
-    
+    document.getElementById('acim-event').value = document.getElementById('step1').value;
+    document.getElementById('acim-judgment').value = document.getElementById('step3').innerText;
+    resetAcimMeditation(); updateContextDisplay(document.getElementById('step1').value); loadStep9Global();
     document.querySelectorAll("textarea").forEach(autoResizeTextarea);
 }
 
 function loadStep9Global() {
-    const q1 = localStorage.getItem("mindApp_global_step9") || "";
-    const q2 = localStorage.getItem("mindApp_global_step9_extra") || "";
-    
-    const el1 = document.getElementById("step9");
-    const el2 = document.getElementById("step9_extra");
-    
-    if (el1) { el1.value = q1; autoResizeTextarea(el1); }
-    if (el2) { el2.value = q2; autoResizeTextarea(el2); }
+    const el1 = document.getElementById("step9"), el2 = document.getElementById("step9_extra");
+    if (el1) { el1.value = localStorage.getItem("mindApp_global_step9") || ""; autoResizeTextarea(el1); }
+    if (el2) { el2.value = localStorage.getItem("mindApp_global_step9_extra") || ""; autoResizeTextarea(el2); }
 }
 
 function saveAllToLocal() {
-    const u = document.getElementById("userSelect").value;
-    const e = document.getElementById("eventSelect").value;
-    
     localStorage.setItem("mindApp_global_step9", document.getElementById("step9").value);
     localStorage.setItem("mindApp_global_step9_extra", document.getElementById("step9_extra").value);
+    const u = document.getElementById("userSelect").value, e = document.getElementById("eventSelect").value; if (!u || u === "사용자 없음" || !e || e === "사건 없음") return;
     
-    if (!u || u === "사용자 없음" || !e || e === "사건 없음") return;
-    const key = getStorageKey();
-    localStorage.setItem(key + "_title", document.getElementById("mainTitle").value);
-    for(let i=1; i<=8; i++) {
-        const el = document.getElementById("step" + i);
-        if(!el) continue;
-        const val = el.tagName === "TEXTAREA" ? el.value : el.innerText;
-        localStorage.setItem(key + "_step" + i, val);
-    }
-    
-    for(let i=1; i<=5; i++) {
-        localStorage.setItem(key + "_acim_insight_" + i, stepInsights[i] || "");
-    }
+    const key = getStorageKey(); localStorage.setItem(key + "_title", document.getElementById("mainTitle").value);
+    for(let i=1; i<=8; i++) { const el = document.getElementById("step" + i); if(el) localStorage.setItem(key + "_step" + i, el.tagName === "TEXTAREA" ? el.value : el.innerText); }
+    for(let i=1; i<=5; i++) localStorage.setItem(key + "_acim_insight_" + i, stepInsights[i] || "");
 }
 
-/* --- 이미지 및 기능 제어 --- */
 async function makeImage() {
-    const captureArea = document.getElementById("capture");
-    const shareBtn = document.getElementById("shareBtn");
-    shareBtn.disabled = true; shareBtn.innerText = "생성 중...";
+    const shareBtn = document.getElementById("shareBtn"); shareBtn.disabled = true; shareBtn.innerText = "생성 중...";
     try {
-        const canvas = await html2canvas(captureArea, {
+        const canvas = await html2canvas(document.getElementById("capture"), {
             scale: 2, useCORS: true, backgroundColor: "#F2F5F8", width: 1800, 
             onclone: (clonedDoc) => {
-                clonedDoc.getElementById('adminPanel').style.display = 'none';
-                clonedDoc.getElementById('step9-container').style.display = 'none';
+                clonedDoc.getElementById('adminPanel').style.display = 'none'; clonedDoc.getElementById('step9-container').style.display = 'none';
                 clonedDoc.querySelectorAll('.record-card-desc').forEach(el => el.style.display = 'none');
-                const clonedCapture = clonedDoc.getElementById('capture');
-                clonedCapture.style.width = '1800px'; clonedCapture.style.padding = '0px'; 
-                clonedCapture.style.letterSpacing = '0px'; // 폰트 자간 잘림 방지 규칙 고정
+                clonedDoc.getElementById('capture').style.width = '1800px'; clonedDoc.getElementById('capture').style.padding = '0px'; clonedDoc.getElementById('capture').style.letterSpacing = '0px';
                 
-                const title = clonedDoc.getElementById('mainTitle');
-                const titleDiv = clonedDoc.createElement('div');
+                const title = clonedDoc.getElementById('mainTitle'), titleDiv = clonedDoc.createElement('div');
                 titleDiv.innerText = title.value || "나의 마음 탐구 기록";
                 titleDiv.style.cssText = "font-size:75px; font-weight:900; color:#003366; text-align:center; margin-bottom:60px; padding:30px; border-bottom:8px solid #003366; line-height:1.3;";
                 title.replaceWith(titleDiv);
                 
                 clonedDoc.querySelectorAll('textarea, .editable-list').forEach(ta => {
-                    const originalTextContent = (ta.tagName === "TEXTAREA" ? ta.value : ta.innerText).trim();
-                    const d = clonedDoc.createElement('div');
+                    const txt = (ta.tagName === "TEXTAREA" ? ta.value : ta.innerText).trim(), d = clonedDoc.createElement('div');
                     d.style.cssText = "background:white; border:1px solid #dce4ee; padding:40px; border-radius:20px; font-size:48px; line-height:1.7; color:#2c3e50; white-space:pre-wrap; margin-top:15px;";
-                    if (originalTextContent) {
-                        const lines = originalTextContent.split('\n');
-                        const bulletedHTML = lines.map((line, index) => {
-                            const trimmed = line.trim();
-                            if (!trimmed) return '<div style="height: 0.8em;"></div>';
-                            let content = trimmed;
-                            if (!trimmed.startsWith('•') && !trimmed.startsWith('-') && !trimmed.startsWith('*')) content = `• ${trimmed}`;
-                            const isLastLine = index === lines.length - 1;
-                            const borderStyle = isLastLine ? "" : "border-bottom: 2px dashed #cbd6e2; padding-bottom: 25px; margin-bottom: 25px;";
-                            return `<div style="padding-left: 1.4em; text-indent: -0.7em; word-break: break-all; ${borderStyle}">${content}</div>`;
+                    if (txt) {
+                        d.innerHTML = txt.split('\n').map((line, idx) => {
+                            const tr = line.trim(); if (!tr) return '<div style="height: 0.8em;"></div>';
+                            return `<div style="padding-left: 1.4em; text-indent: -0.7em; word-break: break-all; ${idx === txt.split('\n').length - 1 ? "" : "border-bottom: 2px dashed #cbd6e2; padding-bottom: 25px; margin-bottom: 25px;"}">${(!tr.startsWith('•') && !tr.startsWith('-') && !tr.startsWith('*')) ? '• ' : ''}${tr}</div>`;
                         }).join('');
-                        d.innerHTML = bulletedHTML;
                     } else { d.innerText = "기록된 내용이 없습니다."; d.style.color = "#ccc"; }
                     ta.replaceWith(d);
                 });
-                clonedDoc.querySelectorAll('.record-card-title').forEach(el => {
-                    el.style.fontSize = '45px'; el.style.marginBottom = '15px'; el.style.color = '#007AFF';
-                });
+                clonedDoc.querySelectorAll('.record-card-title').forEach(el => { el.style.fontSize = '45px'; el.style.marginBottom = '15px'; el.style.color = '#007AFF'; });
             }
         });
         canvas.toBlob(async (blob) => {
             const file = new File([blob], "mind_diary.png", { type: "image/png" });
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({ files: [file] });
-            } else { 
-                document.getElementById("previewImg").src = canvas.toDataURL(); 
-                document.getElementById("previewBox").style.display = "flex"; 
-            }
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file] });
+            else { document.getElementById("previewImg").src = canvas.toDataURL(); document.getElementById("previewBox").style.display = "flex"; }
             shareBtn.disabled = false; shareBtn.innerText = "❤️ 이미지 공유";
         });
     } catch (e) { shareBtn.disabled = false; shareBtn.innerText = "실패"; }
 }
 
-function togglestep9() { 
-    const c = document.getElementById('step9-content'); 
-    const icon = document.getElementById('toggle-icon');
-    if (c.style.display === 'none') {
-        c.style.display = 'block';
-        icon.innerText = '▼';
-    } else {
-        c.style.display = 'none';
-        icon.innerText = '▲';
-    }
+function togglestep9() {
+    const c = document.getElementById('step9-content'), icon = document.getElementById('toggle-icon');
+    const isNone = c.style.display === 'none'; c.style.display = isNone ? 'block' : 'none'; icon.innerText = isNone ? '▼' : '▲';
 }
 function closePreview() { document.getElementById("previewBox").style.display = "none"; }
 
 function copyQ1() {
-    const s1 = document.getElementById('step1').value;
-    const q1 = document.getElementById('step9').value;
-    const combinedText = `[나의 마음 관찰 기록 - 공감 모드]\n1. 사건: ${s1}\n\n[Gemini에게 보내는 질문]\n${q1}`;
-    navigator.clipboard.writeText(combinedText).then(() => {
-        alert("사건과 질문1이 복사되었습니다!");
-    }).catch(err => { alert("복사 실패"); });
+    navigator.clipboard.writeText(`[나의 마음 관찰 기록 - 공감 모드]\n1. 사건: ${document.getElementById('step1').value}\n\n[Gemini에게 보내는 질문]\n${document.getElementById('step9').value}`)
+        .then(() => alert("사건 and 질문1이 복사되었습니다!"));
 }
-
 function copyQ2() {
-    const s1 = document.getElementById('step1').value;
-    const s2 = document.getElementById('step2').value;
-    const s3 = document.getElementById('step3').innerText;
-    const s4 = document.getElementById('step4').value;
-    const s5 = document.getElementById('step5').innerText;
-    const s6 = document.getElementById('step6').innerText;
-    const q2 = document.getElementById('step9_extra').value;
-
-    const combinedText = `[나의 마음 관찰 기록 - 성찰 모드]\n1. 사건: ${s1}\n2. 감정: ${s2}\n3. 생각(판단): ${s3}\n4. 핵심 욕구: ${s4}\n5. 욕구 이유: ${s5}\n6. 행동 실천: ${s6}\n\n[Gemini에게 보내는 질문]\n${q2}`;
-    navigator.clipboard.writeText(combinedText).then(() => {
-        alert("1~6번 전체 기록과 질문2가 복사되었습니다!");
-    }).catch(err => { alert("복사 실패"); });
+    const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6'].map(id => document.getElementById(id).value || document.getElementById(id).innerText);
+    navigator.clipboard.writeText(`[나의 마음 관찰 기록 - 성찰 모드]\n1. 사건: ${steps[0]}\n2. 감정: ${steps[1]}\n3. 생각(판단): ${steps[2]}\n4. 핵심 욕구: ${steps[3]}\n5. 욕구 이유: ${steps[4]}\n6. 행동 실천: ${steps[5]}\n\n[Gemini에게 보내는 질문]\n${document.getElementById('step9_extra').value}`)
+        .then(() => alert("1~6번 전체 기록과 질문2가 복사되었습니다!"));
 }
-
-
-/* ==========================================================================
-   ACIM 마음 정화 명상 로직 영역
-   ========================================================================== */
-let currentStepIndex = -1; 
-let stepInsights = {};
-
-const scripts = [
-    { title: "안내: 정화 준비", text: "정화하고 싶은 사건과 판단을 적어주세요.", audio: "audio/step0.mp3" },
-    { title: "준비: 마음 가다듬기", text: "잠시 눈을 감고 깊게 숨을 들이마시고 내뱉습니다.\n이제 성령께 이 기억을 맡길 준비를 합니다.", audio: "audio/step1.mp3" },
-    { title: "1단계: 성령께 맡기기", text: `"나는 이 사건을 내가 생각하는 의미로 이해하지 않겠습니다." \n\n"나는 이 상황을 다른 관점에서 보겠습니다."`, audio: "audio/step2.mp3" },
-    { title: "2단계: 기억의 정화", text: `"내가 이 기억에 대해 느끼는 분노는 내가 보고 있는 과거에 근거한 것이며, 지금 여기에는 존재하지 않습니다."`, audio: "audio/step3.mp3" },
-    { title: "3단계: 용서와 취소", text: `"성령님, 제가 이 기억을 당신의 시각으로 보게 도와주십시오."\n\n과거의 무거운 짐을 내려놓습니다.`, audio: "audio/step4.mp3" },
-    { title: "4단계: 평온과 기적", text: `"내면에 있는 본래의 평온과 하나가 됩니다.\n갈등이 완전히 사라진 자리에 기적과 사랑을 흔쾌히 수용합니다."`, audio: "audio/step5.mp3" }
-];
-
-let audioPlayer;
-let audioIcon;
-let audioBtn;
 
 function toggleAudio() {
-    if (!audioPlayer.src || audioPlayer.src === "") {
-        audioPlayer.src = scripts[0].audio;
-    }
+    if (!audioPlayer.src || audioPlayer.src.includes(window.location.host)) audioPlayer.src = scripts[Math.max(0, currentStepIndex)].audio;
     if (audioPlayer.paused) {
-        const playPromise = audioPlayer.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                console.log("Autoplay prevented:", error);
-                alert("재생 권한이 필요합니다. 화면을 터치한 후 다시 눌러주세요.");
-            });
-        }
-    } else {
-        audioPlayer.pause();
-    }
+        audioPlayer.play().catch(() => alert("재생 권한이 필요합니다. 화면을 터치한 후 다시 눌러주세요."));
+    } else audioPlayer.pause();
 }
-
-function saveCurrentInsight() { 
-    if(currentStepIndex >= 1 && currentStepIndex <= 5) {
-        stepInsights[currentStepIndex] = document.getElementById('acim-insight').value; 
-        saveAllToLocal(); 
-    }
-}
+function saveCurrentInsight() { if(currentStepIndex >= 1 && currentStepIndex <= 5) { stepInsights[currentStepIndex] = document.getElementById('acim-insight').value; saveAllToLocal(); } }
 
 function startMeditation() {
-    const u = document.getElementById("userSelect").value;
-    const e = document.getElementById("eventSelect").value;
-    if (!u || u === "사용자 없음" || !e || e === "사건 없음") {
-        return alert("⚙️ 상단 설정 메뉴에서 '사용자'와 '사건'을 먼저 등록하거나 선택해 주세요.");
-    }
+    if (!document.getElementById("userSelect").value || document.getElementById("userSelect").value === "사용자 없음" || !document.getElementById("eventSelect").value || document.getElementById("eventSelect").value === "사건 없음") return alert("⚙️ 상단 설정 메뉴에서 '사용자'와 '사건'을 먼저 등록하거나 선택해 주세요.");
+    if (!document.getElementById('step1').value.trim()) return alert("마음 관찰 기록 탭의 '1. 사건 인식' 칸을 먼저 채워주셔야 정화 명상을 시작할 수 있습니다.");
     
-    const evVal = document.getElementById('step1').value.trim();
-    if (!evVal) return alert("마음 관찰 기록 탭의 '1. 사건 인식' 칸을 먼저 채워주셔야 정화 명상을 시작할 수 있습니다.");
-    
-    document.getElementById('acim-event').value = evVal;
+    document.getElementById('acim-event').value = document.getElementById('step1').value;
     document.getElementById('acim-judgment').value = document.getElementById('step3').innerText;
-    
     document.getElementById('acim-input-section').style.display = 'none';
     document.getElementById('acim-meditation-section').style.display = 'flex';
-    currentStepIndex = 1; 
-    updateAcimUI();
+    currentStepIndex = 1; updateAcimUI();
 }
 
 function updateAcimUI() {
-    const currentContent = scripts[currentStepIndex];
-    document.getElementById('acim-step-title').innerText = currentContent.title;
-    document.getElementById('acim-meditation-content').innerText = currentContent.text;
-    document.getElementById('acim-insight-label').innerText = `${currentContent.title.split(':')[0]} 통찰 기록`;
-    
+    const curr = scripts[currentStepIndex];
+    document.getElementById('acim-step-title').innerText = curr.title;
+    document.getElementById('acim-meditation-content').innerText = curr.text;
+    document.getElementById('acim-insight-label').innerText = `${curr.title.split(':')[0]} 통찰 기록`;
     document.getElementById('acim-insight').value = stepInsights[currentStepIndex] || "";
-    
     document.getElementById('acim-prev-btn').disabled = (currentStepIndex === 1);
     document.getElementById('acim-next-btn').innerText = (currentStepIndex === scripts.length - 1) ? "완료" : "다음 단계";
     
-    audioPlayer.src = currentContent.audio;
-    audioPlayer.play().catch(() => { console.log("자동 재생 대기 중..."); });
+    audioPlayer.src = curr.audio; audioPlayer.play().catch(() => console.log("자동 재생 대기 중..."));
     autoResizeTextarea(document.getElementById('acim-insight'));
 }
 
-function goToNextStep() { 
-    if (currentStepIndex < scripts.length - 1) { 
-        currentStepIndex++; 
-        updateAcimUI(); 
-    } else { 
-        finishMeditation(); 
-    } 
-}
-
-function goToPrevStep() { 
-    if (currentStepIndex > 1) { 
-        currentStepIndex--; 
-        updateAcimUI(); 
-    } 
-}
-
+function goToNextStep() { if (currentStepIndex < scripts.length - 1) { currentStepIndex++; updateAcimUI(); } else finishMeditation(); }
+function goToPrevStep() { if (currentStepIndex > 1) { currentStepIndex--; updateAcimUI(); } }
 function finishMeditation() {
-    audioPlayer.pause();
-    audioPlayer.currentTime = 0; // 오디오 리와인드 초기화 적용
+    audioPlayer.pause(); audioPlayer.currentTime = 0;
     document.getElementById('acim-step-title').innerText = "평온";
     document.getElementById('acim-meditation-content').innerText = "정화 명상이 무사히 완료되었습니다.\n내면의 밝은 빛을 신뢰하세요.";
-    document.getElementById('acim-nav-group').style.display = 'none';
-    document.getElementById('acim-reset-btn').style.display = 'block';
+    document.getElementById('acim-nav-group').style.display = 'none'; document.getElementById('acim-reset-btn').style.display = 'block';
 }
-
 function resetAcimMeditation() {
-    currentStepIndex = -1;
-    document.getElementById('acim-input-section').style.display = 'flex';
-    document.getElementById('acim-meditation-section').style.display = 'none';
-    document.getElementById('acim-nav-group').style.display = 'flex';
-    document.getElementById('acim-reset-btn').style.display = 'none';
-    
-    document.getElementById('acim-insight').value = '';
-    if (!audioPlayer.paused) audioPlayer.pause();
-    audioPlayer.currentTime = 0; // 오디오 정지 시 재생 바 복원 규칙 완비
+    currentStepIndex = -1; document.getElementById('acim-input-section').style.display = 'flex'; document.getElementById('acim-meditation-section').style.display = 'none';
+    document.getElementById('acim-nav-group').style.display = 'flex'; document.getElementById('acim-reset-btn').style.display = 'none';
+    document.getElementById('acim-insight').value = ''; if (!audioPlayer.paused) audioPlayer.pause(); audioPlayer.currentTime = 0;
 }
 
-
-/* ==========================================================================
-   라이프사이클 및 이벤트 초기화 영역
-   ========================================================================= */
 window.onload = async function() {
-    renderUserList();
-    const lastUser = localStorage.getItem("lastSelectedUser");
-    renderUserList(lastUser);
-    
+    renderUserList(); const lastUser = localStorage.getItem("lastSelectedUser"); renderUserList(lastUser);
     try {
-        const { data, error } = await supabaseClient
-            .from('combine_mind_records')
-            .select('user_name');
-            
-        if (!error && data) {
-            let localUsers = JSON.parse(localStorage.getItem("mindUsers") || "[]");
-            data.forEach(row => {
-                if(row.user_name && !localUsers.includes(row.user_name)) {
-                    localUsers.push(row.user_name);
-                }
-            });
-            localStorage.setItem("mindUsers", JSON.stringify(localUsers));
-            renderUserList(lastUser || localUsers[0]);
+        const { data } = await supabaseClient.from('combine_mind_records').select('user_name');
+        if (data) {
+            let locals = JSON.parse(localStorage.getItem("mindUsers") || "[]");
+            data.forEach(r => { if(r.user_name && !locals.includes(r.user_name)) locals.push(r.user_name); });
+            localStorage.setItem("mindUsers", JSON.stringify(locals)); renderUserList(lastUser || locals[0]);
         }
-    } catch (e) {
-        console.log("Supabase Connection initial bypass:", e);
-    }
+    } catch (e) {}
     
-    audioPlayer = document.getElementById('step-audio');
-    audioIcon = document.getElementById('audio-icon');
-    audioBtn = document.getElementById('audio-toggle-sq');
-
-    audioPlayer.onplay = () => { 
-        audioIcon.innerText = "⏸ 정지"; 
-        audioBtn.classList.add('playing');
-    };
-    audioPlayer.onpause = () => { 
-        audioIcon.innerText = "▶ 가이드 음성 재생"; 
-        audioBtn.classList.remove('playing');
-    };
+    audioPlayer = document.getElementById('step-audio'); audioIcon = document.getElementById('audio-icon'); audioBtn = document.getElementById('audio-toggle-sq');
+    audioPlayer.onplay = () => { audioIcon.innerText = "⏸ 정지"; audioBtn.classList.add('playing'); };
+    audioPlayer.onpause = () => { audioIcon.innerText = "▶ 가이드 음성 재생"; audioBtn.classList.remove('playing'); };
 
     document.querySelectorAll("textarea").forEach(ta => {
         if(ta.id.startsWith('step') || ta.id === 'mainTitle' || ta.id.startsWith('acim-')) {
-            ta.addEventListener("input", (e) => {
-                autoResizeTextarea(e.target); 
-                if(!e.target.id.startsWith('acim-')) {
-                    saveAllToLocal();
-                }
-                if(e.target.id === 'step1') updateContextDisplay(e.target.value);
-            });
-            setTimeout(() => autoResizeTextarea(ta), 200); 
+            ta.addEventListener("input", (e) => { autoResizeTextarea(e.target); if(!e.target.id.startsWith('acim-')) saveAllToLocal(); if(e.target.id === 'step1') updateContextDisplay(e.target.value); });
+            setTimeout(() => autoResizeTextarea(ta), 200);
         }
     });
 
-    [3, 5, 6].forEach(i => {
-        const el = document.getElementById("step" + i);
+    [3, 5, 6, 7, 8, 9, 'step9_extra', 'mainTitle'].forEach(id => {
+        const el = document.getElementById(typeof id === 'number' ? "step" + id : id);
         if(el) el.addEventListener("input", saveAllToLocal);
     });
-    
-    document.getElementById("step7").addEventListener("input", saveAllToLocal);
-    document.getElementById("step8").addEventListener("input", saveAllToLocal);
-    document.getElementById("step9_extra").addEventListener("input", saveAllToLocal);
-    document.getElementById("mainTitle").addEventListener("input", saveAllToLocal);
-    
     loadStep9Global();
 };
 </script>
