@@ -122,10 +122,10 @@
 <nav class="nav-container">
     <div class="tab-menu">
         <button class="tab-btn active" id="btn-record" onclick="showSection('record')">관찰 기록</button>
-        <button class="tab-btn" id="btn-acim" onclick="showSection('acim')">정화 명상</button>
         <button class="tab-btn" id="btn-emotions" onclick="showSection('emotions')">감정</button>
-        <button class="tab-btn" id="btn-judgment" onclick="showSection('judgment')">판단</button>
         <button class="tab-btn" id="btn-needs" onclick="showSection('needs')">욕구</button>
+        <button class="tab-btn" id="btn-judgment" onclick="showSection('judgment')">판단</button>
+        <button class="tab-btn" id="btn-acim" onclick="showSection('acim')">정화 명상</button>
     </div>
 </nav>
 
@@ -274,6 +274,7 @@
     <div class="index-container" id="emotions-index"></div>
 </section>
 
+<!-- 판단 카드 섹션 -->
 <section id="judgment-section" class="content-section">
     <div class="context-guide">
         <span class="context-label">지금 관찰 중인 사건</span>
@@ -454,9 +455,6 @@ const emotionsData = [
     { name: "허탈하다", cat: "cat-sad", desc: "결과가 무너져 에너지가 빠져나간 허전함", sit: "노력이 수포로 돌아갔을 때", body: "팔다리에 힘이 하나도 없고 가슴 속이 텅 빈 구멍 같음", aff: "비워진 마음을 인정하며 새로운 에너지를 기다립니다." }
 ];
 
-// ------------------------------------
-// 첫 번째 코드에서 가져온 판단 카드 데이터 추가
-// ------------------------------------
 const judgmentData = [
   { name: "가소롭다", cat: "cat-low", desc: "상대의 어설픈 시도가 나의 기준에 한참 미치지 못해 우스워 보임", sit: "경험 없는 사람이 큰소리칠 때", body: "입꼬리가 살짝 올라가며 코웃음이 나옴", aff: "나 또한 누군가의 가르침으로 성장했음을 기억하기" },
   { name: "같잖다", cat: "cat-low", desc: "상대가 상황에 맞지 않는 언행으로 자신을 과대평가하고 있음", sit: "자기 객관화가 안 된 사람의 조언을 들을 때", body: "미간이 좁혀지고 눈매가 가늘어짐", aff: "상대가 왜 인정받고 싶어 하는지 그 결핍에 집중하기" },
@@ -656,7 +654,6 @@ function openModal(type, name) {
         content += `<span class="section-label">충족 시</span><div>${item.sat.map(s => `<span class="emotion-tag tag-sat">${s}</span>`).join('')}</div><span class="section-label">미충족 시</span><div>${item.unsat.map(s => `<span class="emotion-tag tag-unsat">${s}</span>`).join('')}</div><div class="action-box" style="margin-top:20px;">${item.action}</div>`;
         content += `<button class="add-to-record-btn" style="margin-top:25px;" onclick="addToRecord('${type}', '${item.name}', this)">＋ 기록장에 추가</button>`;
     } else if (type === 'judgment') {
-        // 판단 카드의 경우 '기록장에 추가' 버튼 생략
         content += `<span class="section-label">상황</span><div class="content-text">${item.sit}</div><span class="section-label">몸의 상태</span><div class="body-status">${item.body}</div><span class="section-label">확언</span><div class="affirmation-box" style="background:#f9f9f9; padding:15px; border-radius:10px; font-style:italic;">"${item.aff}"</div>`;
     } else {
         content += `<span class="section-label">상황</span><div class="content-text">${item.sit}</div><span class="section-label">몸의 상태</span><div class="body-status">${item.body}</div><span class="section-label">확언</span><div class="affirmation-box" style="background:#f9f9f9; padding:15px; border-radius:10px; font-style:italic;">"${item.aff}"</div>`;
